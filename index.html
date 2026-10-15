@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="silver">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom Mo — Generative Botanical Studio</title>
+<meta name="description" content="Bloom Mo: every flower grown from code. Eight species, infinite unique blooms.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e8e8e6; --panel:#f7f7f5; --card:#ffffff; --ink:#1c1c1e; --ink2:#6b6b6e;
+  --line:#d8d8d4; --accent:#2d6a4f; --radius:14px;
+}
+[data-theme="white"]{ --bg:#f4f4f4; --panel:#ffffff; --card:#ffffff; --ink:#1c1c1e; --ink2:#6b6b6e; --line:#e2e2e2; }
+[data-theme="black"]{ --bg:#141414; --panel:#1e1e1e; --card:#242424; --ink:#f2f2f2; --ink2:#a8a8a8; --line:#333; }
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:'Noto Sans TC','Noto Sans',sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; }
+h1,.dela{ font-family:'Dela Gothic One',sans-serif; font-weight:400; }
+.topbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 22px; position:sticky; top:0; z-index:50; background:var(--bg); border-bottom:1px solid var(--line); }
+.brand .t{ font-family:'Dela Gothic One'; font-size:22px; letter-spacing:1px; }
+.brand .s{ font-size:11px; color:var(--ink2); letter-spacing:3px; margin-top:2px; }
+.hctl{ display:flex; align-items:center; gap:10px; }
+.seg{ display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:var(--card); }
+.seg button{ border:0; background:transparent; color:var(--ink2); padding:7px 13px; cursor:pointer; font-size:12px; font-weight:500; }
+.seg button.on{ background:var(--ink); color:var(--bg); }
+.tbtn{ width:32px; height:32px; border-radius:50%; border:1px solid var(--line); cursor:pointer; background:var(--card); font-size:14px; }
+.work{ max-width:1200px; margin:0 auto; padding:20px 22px 40px; }
+.stage{ position:relative; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+#cv{ display:block; width:100%; height:62vh; min-height:420px; cursor:crosshair; }
+.hint{ position:absolute; bottom:12px; left:0; right:0; text-align:center; font-size:12px; color:var(--ink2); pointer-events:none; letter-spacing:1px; }
+.controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:16px; }
+.btn{ border:1px solid var(--line); background:var(--card); color:var(--ink); padding:10px 20px; border-radius:999px; cursor:pointer; font-size:14px; font-weight:500; }
+.btn:hover{ border-color:var(--ink2); }
+.btn.primary{ background:var(--ink); color:var(--bg); border-color:var(--ink); font-weight:700; }
+.btn.primary:hover{ opacity:.88; }
+.species{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.sp{ border:1px solid var(--line); background:var(--card); border-radius:12px; padding:8px 14px; cursor:pointer; font-size:13px; color:var(--ink2); }
+.sp.on{ border-color:var(--accent); color:var(--ink); background:var(--panel); font-weight:600; }
+.sp .em{ margin-right:6px; }
+.count{ margin-left:auto; font-size:13px; color:var(--ink2); }
+footer{ text-align:center; padding:26px; font-size:12px; color:var(--ink2); letter-spacing:1px; }
+footer a{ color:var(--ink2); }
+@media (max-width:768px){
+  .topbar{ padding:10px 14px; } .brand .t{ font-size:18px; }
+  .work{ padding:12px 12px 30px; } #cv{ height:52vh; min-height:320px; }
+  .btn{ padding:11px 18px; font-size:15px; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><div class="t">BLOOM MO</div><div class="s">GENERATIVE BOTANICAL STUDIO</div></div>
+  <div class="hctl">
+    <div class="seg" id="langSeg"><button data-l="en" class="on">EN</button><button data-l="zh">中</button></div>
+    <button class="tbtn" data-th="white" title="white" style="background:#fff"></button>
+    <button class="tbtn" data-th="silver" title="silver" style="background:#d8d8d8"></button>
+    <button class="tbtn" data-th="black" title="black" style="background:#222"></button>
+  </div>
+</div>
+<div class="work">
+  <div class="stage">
+    <canvas id="cv"></canvas>
+    <div class="hint" id="hint"></div>
+  </div>
+  <div class="controls">
+    <button class="btn primary" id="bGrow">🌱 Grow a flower</button>
+    <button class="btn" id="bBouquet">💐 Surprise bouquet</button>
+    <button class="btn" id="bClear">Clear</button>
+    <button class="btn" id="bPng">Export PNG</button>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="species" id="species"></div>
+</div>
+<footer>BLOOM MO · <span id="footTx">every flower grown from code</span> · <a href="https://buymeacoffee.com/whynotartmoney" target="_blank" rel="noopener">Buy Me a Coffee</a></footer>
+<script>
+/* ================= i18n ================= */
+const STR={
+  en:{grow:'🌱 Grow a flower',bouquet:'💐 Surprise bouquet',clear:'Clear',png:'Export PNG',hint:'click the garden to plant · every bloom is unique',foot:'every flower grown from code',count:n=>n+(n===1?' bloom':' blooms')},
+  zh:{grow:'🌱 種一朵花',bouquet:'💐 驚喜花束',clear:'清空',png:'匯出 PNG',hint:'點擊花園種花 · 每朵都獨一無二',foot:'每朵花都由代碼種出',count:n=>n+' 朵花'}
+};
+let lang='en';
+const t=k=>STR[lang][k];
+function applyLang(){
+  document.documentElement.lang=lang==='zh'?'zh-Hant':'en';
+  document.querySelectorAll('#langSeg button').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));
+  document.getElementById('bGrow').textContent=t('grow');
+  document.getElementById('bBouquet').textContent=t('bouquet');
+  document.getElementById('bClear').textContent=t('clear');
+  document.getElementById('bPng').textContent=t('png');
+  document.getElementById('hint').textContent=t('hint');
+  document.getElementById('footTx').textContent=t('foot');
+  updateCount();
+  buildSpecies();
+}
+document.querySelectorAll('#langSeg button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;applyLang();});
+/* ================= theme ================= */
+function applyTheme(th){
+  if(th) document.documentElement.dataset.theme=th;
+  try{localStorage.setItem('bloommo-theme',document.documentElement.dataset.theme);}catch(e){}
+}
+document.querySelectorAll('.tbtn').forEach(b=>b.onclick=()=>applyTheme(b.dataset.th));
+try{const s=localStorage.getItem('bloommo-theme');if(s)document.documentElement.dataset.theme=s;}catch(e){}
+
+/* ================= species ================= */
+const SPECIES=[
+  {id:'rose',em:'🌹',en:'Rose',zh:'玫瑰',petals:[24,34],layers:3,shape:'round',cols:[['#8e1f2f','#d94f5c'],['#b03060','#e87a90'],['#7a1f3d','#c94f6d']],center:['#5c1a24','#3d1218'],leaf:'#2d6a4f'},
+  {id:'sakura',em:'🌸',en:'Cherry Blossom',zh:'櫻花',petals:[5,5],layers:1,shape:'notch',cols:[['#e8a0b4','#f7d4dd'],['#d97a95','#f2b8c6']],center:['#c94f6d','#8e2f45'],leaf:'#4a7c59'},
+  {id:'sunflower',em:'🌻',en:'Sunflower',zh:'向日葵',petals:[20,28],layers:2,shape:'narrow',cols:[['#d9940d','#f5c542'],['#c47f0a','#eab308']],center:['#5c3a10','#3d2608'],leaf:'#3a7d44'},
+  {id:'orchid',em:'🌺',en:'Orchid',zh:'蘭花',petals:[6,6],layers:1,shape:'exotic',cols:[['#7b2d8e','#b45fc4'],['#9b30a8','#d47ae0'],['#5c1f6e','#9b4fb0']],center:['#f5c542','#d9940d'],leaf:'#2d6a4f'},
+  {id:'lotus',em:'🪷',en:'Lotus',zh:'蓮花',petals:[14,20],layers:2,shape:'broad',cols:[['#d97a95','#f7c8d4'],['#e8e8e8','#ffffff']],center:['#f5c542','#eab308'],leaf:'#3a7d44'},
+  {id:'lavender',em:'💜',en:'Lavender',zh:'薰衣草',petals:[0,0],layers:0,shape:'spike',cols:[['#7b5fc4','#a88fe0']],center:['#5c4a9b','#3d3270'],leaf:'#5a7d5a'},
+  {id:'tulip',em:'🌷',en:'Tulip',zh:'鬱金香',petals:[6,6],layers:1,shape:'cup',cols:[['#d94f5c','#f08a92'],['#eab308','#f5d547'],['#b45fc4','#d49ae0']],center:['#8e2f45','#5c1f2e'],leaf:'#3a7d44'},
+  {id:'daisy',em:'🌼',en:'Wild Daisy',zh:'野雛菊',petals:[16,24],layers:2,shape:'narrow',cols:[['#f0f0e8','#ffffff'],['#f5f0dc','#fffbe8']],center:['#eab308','#c47f0a'],leaf:'#4a7c59'},
+];
+let curSpecies='any';
+function buildSpecies(){
+  const el=document.getElementById('species');
+  const all={id:'any',em:'🎲',en:lang==='zh'?'隨機':'Random',zh:'隨機'};
+  el.innerHTML=[all,...SPECIES].map(s=>
+    `<button class="sp${curSpecies===s.id?' on':''}" data-s="${s.id}"><span class="em">${s.em}</span>${lang==='zh'?(s.zh||s.en):s.en}</button>`
+  ).join('');
+  el.querySelectorAll('.sp').forEach(b=>b.onclick=()=>{curSpecies=b.dataset.s;buildSpecies();});
+}
+
+/* ================= seeded random ================= */
+function mulberry(seed){
+  let a=seed>>>0;
+  return function(){
+    a|=0;a=a+0x6D2B79F5|0;
+    let t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return((t^t>>>14)>>>0)/4294967296;
+  };
+}
+
+/* ================= flower generation ================= */
+function genFlower(speciesId,x,y,scale,rng){
+  const sp=SPECIES.find(s=>s.id===speciesId)||SPECIES[(rng()*SPECIES.length)|0];
+  const col=sp.cols[(rng()*sp.cols.length)|0];
+  const f={
+    sp:sp.id, x, y, scale,
+    seed:(rng()*1e9)|0,
+    stemLean:(rng()-0.5)*0.5,
+    stemLen:0.75+rng()*0.4,
+    petals:[],
+    leaves:[],
+    grow:0, // 0..1 animation
+    swayPh:rng()*6.28,
+  };
+  const nP=sp.petals[0]+((rng()*(sp.petals[1]-sp.petals[0]+1))|0);
+  for(let i=0;i<nP;i++){
+    f.petals.push({
+      a:(i/nP)*Math.PI*2+(rng()-0.5)*0.25,
+      len:0.8+rng()*0.45,
+      wid:0.32+rng()*0.22,
+      curl:0.3+rng()*0.7,
+      shade:rng(),
+    });
+  }
+  const nL=2+((rng()*3)|0);
+  for(let i=0;i<nL;i++){
+    f.leaves.push({t:0.3+rng()*0.45, side:rng()<0.5?-1:1, size:0.5+rng()*0.6, ang:0.5+rng()*0.5});
+  }
+  f.budN = sp.shape==='spike' ? 10+((rng()*8)|0) : 0;
+  f.buds=[];
+  for(let i=0;i<f.budN;i++) f.buds.push({t:0.15+0.85*(i/f.budN), s:0.5+rng()*0.5, c:rng()});
+  return f;
+}
+
+/* ================= canvas ================= */
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+let DPR=1,W=0,H=0,flowers=[];
+function sizeCanvas(){
+  DPR=Math.min(2,window.devicePixelRatio||1);
+  const r=cv.getBoundingClientRect();
+  W=r.width;H=r.height;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+}
+function groundY(){ return H*0.92; }
+
+/* draw a single petal */
+function petal(g,cx,cy,angle,len,wid,curl,col,shadeR,open){
+  g.save();g.translate(cx,cy);g.rotate(angle);
+  const L=len*open, Wd=wid*len;
+  const grd=g.createLinearGradient(0,0,L,0);
+  grd.addColorStop(0,shadeCol(col[0],-0.25));
+  grd.addColorStop(0.55,mixCol(col[0],col[1],shadeR*0.5));
+  grd.addColorStop(1,shadeCol(col[1],0.12));
+  g.fillStyle=grd;
+  g.beginPath();
+  g.moveTo(0,0);
+  g.bezierCurveTo(L*0.25,-Wd*(0.7+curl*0.3), L*0.75,-Wd*(0.9-curl*0.2), L,-Wd*0.12);
+  g.bezierCurveTo(L*0.75,Wd*(0.9-curl*0.2), L*0.25,Wd*(0.7+curl*0.3), 0,0);
+  g.fill();
+  g.restore();
+}
+function shadeCol(hex,amt){
+  const n=parseInt(hex.slice(1),16);
+  let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  if(amt>=0){r+=(255-r)*amt;g+=(255-g)*amt;b+=(255-b)*amt;}
+  else{r*=1+amt;g*=1+amt;b*=1+amt;}
+  return `rgb(${r|0},${g|0},${b|0})`;
+}
+function mixCol(h1,h2,t){
+  const a=parseInt(h1.slice(1),16),b=parseInt(h2.slice(1),16);
+  const r=(((a>>16)&255)*(1-t)+((b>>16)&255)*t)|0;
+  const g=(((a>>8)&255)*(1-t)+((b>>8)&255)*t)|0;
+  const bl=((a&255)*(1-t)+(b&255)*t)|0;
+  return `rgb(${r},${g},${bl})`;
+}
+
+function drawFlower(g,f,time){
+  const sp=SPECIES.find(s=>s.id===f.sp);
+  const S=f.scale, gy=groundY();
+  const sway=Math.sin(time*0.001+f.swayPh)*4*S;
+  const bx=f.x+sway, by=gy;
+  const stemTopY=gy-f.stemLen*H*0.52*f.grow;
+  const stemTopX=bx+f.stemLean*60*S*f.grow;
+  // stem
+  g.strokeStyle=sp.leaf; g.lineCap='round';
+  g.lineWidth=Math.max(2,7*S*f.grow);
+  g.beginPath(); g.moveTo(bx,by);
+  g.quadraticCurveTo(bx+f.stemLean*30*S, by-(gy-stemTopY)*0.6, stemTopX, stemTopY);
+  g.stroke();
+  // leaves
+  for(const l of f.leaves){
+    if(f.grow<l.t) continue;
+    const lt=(f.grow-l.t)/(1-l.t);
+    const lx=bx+f.stemLean*30*S*l.t*2, ly=by-(gy-stemTopY)*l.t;
+    const ls=l.size*46*S*Math.min(1,lt*2);
+    g.save();g.translate(lx,ly);g.rotate(l.side*(l.ang+0.4));
+    g.fillStyle=sp.leaf;
+    g.beginPath();
+    g.moveTo(0,0);
+    g.bezierCurveTo(ls*0.4,-ls*0.35, ls*0.9,-ls*0.25, ls,0);
+    g.bezierCurveTo(ls*0.9,ls*0.25, ls*0.4,ls*0.35, 0,0);
+    g.fill();
+    g.restore();
+  }
+  if(f.grow<0.55) return;
+  const bloomP=Math.min(1,(f.grow-0.55)/0.45);
+  const ease=1-Math.pow(1-bloomP,3);
+  const col=sp.cols[f.seed%sp.cols.length];
+  const R=52*S*ease;
+  if(sp.shape==='spike'){
+    // lavender: buds along upper stem
+    for(const b of f.buds){
+      if(bloomP<b.t*0.7) continue;
+      const px=stemTopX+(b.c-0.5)*10*S, py=stemTopY-(b.t*90*S)*((bloomP-b.t*0.7)/0.3+0.7);
+      const br=(5+b.s*4)*S*Math.min(1,(bloomP-b.t*0.7)*3);
+      if(br<=0)continue;
+      g.fillStyle=mixCol(col[0],col[1],b.c);
+      g.beginPath();g.ellipse(px,py,br*0.7,br,0,0,6.2832);g.fill();
+    }
+    return;
+  }
+  // bloom center
+  const cx=stemTopX, cy=stemTopY;
+  // back petals
+  const layers=sp.layers||1;
+  for(let li=layers-1;li>=0;li--){
+    const lr=1-li*0.28;
+    const n=Math.max(3,Math.round(f.petals.length/layers));
+    for(let i=0;i<n;i++){
+      const p=f.petals[(li*n+i)%f.petals.length];
+      const open=ease*(li===0?1:0.75);
+      petal(g,cx,cy,p.a+(li*0.35),R*p.len*lr,p.wid,p.curl,col,p.shade,open);
+    }
+  }
+  // center
+  const cr=R*0.30*ease;
+  if(cr>1){
+    const grd=g.createRadialGradient(cx,cy,0,cx,cy,cr);
+    grd.addColorStop(0,sp.center[1]);grd.addColorStop(1,sp.center[0]);
+    g.fillStyle=grd;
+    g.beginPath();g.arc(cx,cy,cr,0,6.2832);g.fill();
+    // stamens
+    g.strokeStyle=shadeCol(sp.center[1],0.3);g.lineWidth=Math.max(1,1.6*S);
+    const nSt=8;
+    for(let i=0;i<nSt;i++){
+      const a=(i/nSt)*6.2832+f.seed;
+      g.beginPath();g.moveTo(cx+Math.cos(a)*cr*0.4,cy+Math.sin(a)*cr*0.4);
+      g.lineTo(cx+Math.cos(a)*cr*1.5,cy+Math.sin(a)*cr*1.5);g.stroke();
+      g.fillStyle=sp.center[1];
+      g.beginPath();g.arc(cx+Math.cos(a)*cr*1.5,cy+Math.sin(a)*cr*1.5,Math.max(1,2.4*S),0,6.2832);g.fill();
+    }
+  }
+}
+
+function render(time){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  // sky
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  const th=document.documentElement.dataset.theme;
+  if(th==='black'){sky.addColorStop(0,'#1a2b22');sky.addColorStop(1,'#0d1512');}
+  else{sky.addColorStop(0,'#eef4ee');sky.addColorStop(1,'#dfe8dc');}
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  // sun glow
+  const sg=ctx.createRadialGradient(W*0.82,H*0.18,10,W*0.82,H*0.18,H*0.5);
+  sg.addColorStop(0,'rgba(255,236,170,.55)');sg.addColorStop(1,'rgba(255,236,170,0)');
+  ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+  // ground
+  ctx.fillStyle=th==='black'?'#16241d':'#cfe0c8';
+  ctx.beginPath();ctx.ellipse(W/2,groundY()+H*0.06,W*0.75,H*0.09,0,0,6.2832);ctx.fill();
+  // flowers back-to-front
+  const sorted=[...flowers].sort((a,b)=>a.scale-b.scale);
+  for(const f of sorted) drawFlower(ctx,f,time);
+  requestAnimationFrame(render);
+}
+
+/* ================= actions ================= */
+function updateCount(){
+  document.getElementById('count').textContent=t('count')(flowers.length);
+}
+function plant(x,y,species){
+  const rng=mulberry((Math.random()*1e9)|0);
+  const sid=species==='any'?SPECIES[(rng()*SPECIES.length)|0].id:species;
+  const scale=0.7+rng()*0.7;
+  const f=genFlower(sid,x,y,scale,rng);
+  flowers.push(f);
+  if(flowers.length>24) flowers.shift();
+  updateCount();
+}
+document.getElementById('bGrow').onclick=()=>{
+  const x=W*(0.15+Math.random()*0.7);
+  plant(x,0,curSpecies);
+};
+document.getElementById('bBouquet').onclick=()=>{
+  flowers=[];
+  const n=5+((Math.random()*4)|0);
+  for(let i=0;i<n;i++){
+    setTimeout(()=>{
+      plant(W*(0.12+0.76*(i/(n-1)))+(Math.random()-0.5)*40,0,'any');
+    },i*350);
+  }
+};
+document.getElementById('bClear').onclick=()=>{flowers=[];updateCount();};
+cv.addEventListener('click',e=>{
+  const r=cv.getBoundingClientRect();
+  plant(e.clientX-r.left,0,curSpecies);
+});
+document.getElementById('bPng').onclick=()=>{
+  const ex=document.createElement('canvas');
+  ex.width=W*2;ex.height=H*2;
+  const g=ex.getContext('2d');
+  g.scale(2,2);
+  const keep={W,H,DPR};
+  // render current frame to export canvas via temp swap
+  const tmpCv=cv;
+  // simplest: draw current canvas bitmap scaled
+  g.drawImage(cv,0,0,W,H);
+  const a=document.createElement('a');
+  a.download='bloom-mo.png';
+  a.href=ex.toDataURL('image/png');
+  a.click();
+};
+
+/* ================= growth loop ================= */
+setInterval(()=>{
+  let dirty=false;
+  for(const f of flowers){
+    if(f.grow<1){f.grow=Math.min(1,f.grow+0.012);dirty=true;}
+  }
+},33);
+
+/* ================= boot ================= */
+applyTheme();applyLang();buildSpecies();updateCount();
+sizeCanvas();
+window.addEventListener('resize',sizeCanvas);
+// welcome bouquet
+setTimeout(()=>{
+  const n=3;
+  for(let i=0;i<n;i++) setTimeout(()=>plant(W*(0.25+0.25*i),0,'any'),i*400);
+},600);
+requestAnimationFrame(render);
+</script>
+</body>
+</html>
