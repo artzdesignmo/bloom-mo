@@ -1181,11 +1181,12 @@ function curOpts(){
 }
 /* seed drops FROM the click position; flower (with vase) is placed at once,
    growth unlocks when the seed lands (in the vase mouth, if any) */
-function plant(x,y,species){
+function plant(x,y,species,preset){
   if(y===undefined||y>groundY()-10) y=groundY()-10;
   const rng=mulberry((Math.random()*1e9)|0);
   const sid=species==='any'?SPECIES[(rng()*SPECIES.length)|0].id:species;
-  const f=genFlower(sid,x,(0.7+rng()*0.7)*SL.size(),rng,curOpts(),curStyle,curVase,curForm);
+  const st=preset?preset.style:curStyle, va=preset?preset.vase:curVase, fo=preset?preset.form:curForm;
+  const f=genFlower(sid,x,(0.7+rng()*0.7)*SL.size(),rng,curOpts(),st,va,fo);
   const vm=vaseMetrics(f);
   const targetY=vm?vm.mouthY:groundY()-4;
   flowers.push(f);
@@ -1199,7 +1200,8 @@ document.getElementById('bGrow').onclick=()=>{
 };
 document.getElementById('bBouquet').onclick=()=>{
   const n=5+((Math.random()*4)|0);
-  for(let i=0;i<n;i++) setTimeout(()=>plant(W*(0.12+0.76*(i/(n-1)))+(Math.random()-0.5)*40,H*0.25,'any'),i*450);
+  const preset={style:curStyle,vase:curVase,form:curForm};
+  for(let i=0;i<n;i++) setTimeout(()=>plant(W*(0.12+0.76*(i/(n-1)))+(Math.random()-0.5)*40,H*0.25,'any',preset),i*450);
 };
 document.getElementById('bClear').onclick=()=>{flowers=[];seeds=[];updateCount();};
 cv.addEventListener('click',e=>{
@@ -1248,6 +1250,8 @@ function tick(time){
   // growth + vase pop-in + sway spring physics
   for(const f of flowers){
     if(f.vaseGrow<1) f.vaseGrow=Math.min(1,f.vaseGrow+dt*2.2);
+    // failsafe: a locked flower whose seed is gone must not stay frozen
+    if(f.locked&&!seeds.some(s=>s.flower===f)) f.locked=false;
     if(!f.locked&&f.grow<1) f.grow=Math.min(1,f.grow+f.growSpeed*dt*3);
     const a=-26*f.swayX-3.4*f.swayV;
     f.swayV+=a*dt; f.swayX+=f.swayV*dt;
@@ -1259,7 +1263,10 @@ function tick(time){
 applyTheme();applyLang();buildSpecies();buildBgs();refreshVals();updateCount();
 sizeCanvas();
 window.addEventListener('resize',sizeCanvas);
-setTimeout(()=>{for(let i=0;i<3;i++)setTimeout(()=>plant(W*(0.25+0.25*i),H*0.25,'any'),i*500);},600);
+setTimeout(()=>{
+  const welcomePreset={style:'watercolor',vase:'none',form:'radial'};
+  for(let i=0;i<3;i++)setTimeout(()=>plant(W*(0.25+0.25*i),H*0.25,'any',welcomePreset),i*500);
+},600);
 requestAnimationFrame(render);
 requestAnimationFrame(tick);
 </script>
