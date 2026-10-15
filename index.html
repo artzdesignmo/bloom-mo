@@ -80,7 +80,7 @@ input[type=range]{ width:100%; accent-color:var(--accent); cursor:pointer; }
 </head>
 <body>
 <canvas id="cv"></canvas>
-<button id="gear" aria-label="settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8a8a8e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+<button id="gear" aria-label="settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8a8a8e" stroke-width="1.7"><ellipse cx="12" cy="7" rx="2.4" ry="3.4"/><ellipse cx="12" cy="7" rx="2.4" ry="3.4" transform="rotate(72 12 12)"/><ellipse cx="12" cy="7" rx="2.4" ry="3.4" transform="rotate(144 12 12)"/><ellipse cx="12" cy="7" rx="2.4" ry="3.4" transform="rotate(216 12 12)"/><ellipse cx="12" cy="7" rx="2.4" ry="3.4" transform="rotate(288 12 12)"/><circle cx="12" cy="12" r="1.7"/></svg></button>
 <div id="scrim"></div>
 <aside id="panel">
   <h1>BLOOM MO</h1>
@@ -93,6 +93,7 @@ input[type=range]{ width:100%; accent-color:var(--accent); cursor:pointer; }
   </div>
   <div class="sec"><div class="lbl" id="lblSpecies">SPECIES</div><div class="chips" id="species"></div></div>
   <div class="sec"><div class="lbl" id="lblBg">BACKGROUND</div><div class="chips" id="bgs"></div></div>
+  <div class="sec"><div class="lbl" id="lblTone">TONE</div><div class="chips" id="tones"></div></div>
   <div class="sec"><div class="lbl" id="lblGrow">GROWTH & STEM</div>
     <div class="slider-row"><div class="row"><span class="nm" id="nmSpeed">Growth speed</span><span class="val" id="vSpeed"></span></div><input type="range" id="sSpeed" min="20" max="500" value="100"></div>
     <div class="slider-row"><div class="row"><span class="nm" id="nmThick">Stem thickness</span><span class="val" id="vThick"></span></div><input type="range" id="sThick" min="40" max="300" value="80"></div>
@@ -118,13 +119,15 @@ input[type=range]{ width:100%; accent-color:var(--accent); cursor:pointer; }
 const STR={
   en:{grow:'🌱 Grow a flower',bouquet:'💐 Surprise bouquet',clear:'Clear',png:'Export PNG',
       hint:'click the garden to drop a seed · every bloom is unique',foot:'every flower grown from code',
-      count:n=>n+(n===1?' bloom':' blooms'),species:'SPECIES',bg:'BACKGROUND',growSec:'GROWTH & STEM',pref:'PREFERENCES',
+      count:n=>n+(n===1?' bloom':' blooms'),species:'SPECIES',bg:'BACKGROUND',tone:'TONE',growSec:'GROWTH & STEM',pref:'PREFERENCES',
       speed:'Growth speed',thick:'Stem thickness',curve:'Stem curvature',len:'Stem length',fcount:'Flowers per stem',size:'Flower size',
+      tones:['Color','Mono','B&W'],
       bgs:['Sunny sky','Light green','Gray dots','Watercolor paper','Concrete wall','Rainy day','Cloudy']},
   zh:{grow:'🌱 種一朵花',bouquet:'💐 驚喜花束',clear:'清空',png:'匯出 PNG',
       hint:'點擊花園掉下種子 · 每朵都獨一無二',foot:'每朵花都由代碼種出',
-      count:n=>n+' 朵花',species:'花種',bg:'背景',growSec:'生長與花枝',pref:'偏好設定',
+      count:n=>n+' 朵花',species:'花種',bg:'背景',tone:'色調',growSec:'生長與花枝',pref:'偏好設定',
       speed:'生長速度',thick:'花枝粗細',curve:'花枝彎曲度',len:'花枝長度',fcount:'每枝花朵數',size:'花朵大小',
+      tones:['彩色','單色','黑白'],
       bgs:['淺藍天晴天','淺綠','淺灰加點點','水彩紙','水泥牆','下雨天','陰天']}
 };
 let lang='en';
@@ -140,6 +143,7 @@ function applyLang(){
   document.getElementById('footTx').textContent=t('foot');
   document.getElementById('lblSpecies').textContent=t('species');
   document.getElementById('lblBg').textContent=t('bg');
+  document.getElementById('lblTone').textContent=t('tone');
   document.getElementById('lblGrow').textContent=t('growSec');
   document.getElementById('lblPref').textContent=t('pref');
   document.getElementById('nmSpeed').textContent=t('speed');
@@ -148,7 +152,7 @@ function applyLang(){
   document.getElementById('nmLen').textContent=t('len');
   document.getElementById('nmCount').textContent=t('fcount');
   document.getElementById('nmSize').textContent=t('size');
-  updateCount();buildSpecies();buildBgs();
+  updateCount();buildSpecies();buildBgs();buildTones();
 }
 document.querySelectorAll('#langSeg button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;applyLang();});
 /* ================= theme ================= */
@@ -172,7 +176,32 @@ const SPECIES=[
 ];
 const STEM_GREENS=['#2d6a4f','#3f8f5f','#6ba368'];
 const GROW_SPEEDS=[0.006,0.012,0.022];
-let curSpecies='any', curBg=0;
+let curSpecies='any', curBg=0, toneMode='color';
+function buildTones(){
+  const el=document.getElementById('tones');
+  const modes=['color','mono','bw'];
+  el.innerHTML=t('tones').map((n,i)=>
+    `<button class="chip${toneMode===modes[i]?' on':''}" data-m="${modes[i]}">${n}</button>`
+  ).join('');
+  el.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{toneMode=b.dataset.m;buildTones();});
+}
+/* ---- tone: map any color to current tone mode ---- */
+function parseCol(c){
+  if(c[0]==='#'){const n=parseInt(c.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
+  const m=c.match(/[\d.]+/g);return [+m[0],+m[1],+m[2]];
+}
+function TC(c,f){
+  if(toneMode==='color'||!c) return c;
+  const [r,g,b]=parseCol(c);
+  if(toneMode==='bw'){
+    const lum=Math.round(0.299*r+0.587*g+0.114*b);
+    const v=Math.round(45+lum*0.72);
+    return `rgb(${v},${v},${v})`;
+  }
+  if(!f||!f.monoBase) return c; // mono needs flower context
+  const [br,bg,bb]=parseCol(f.monoBase);
+  return `rgb(${Math.round(r*0.22+br*0.78)},${Math.round(g*0.22+bg*0.78)},${Math.round(b*0.22+bb*0.78)})`;
+}
 /* sliders */
 const SL={
   speed:()=>+document.getElementById('sSpeed').value/100,
@@ -308,6 +337,7 @@ function petal(g,cx,cy,angle,len,wid,col,ink,rng,open,jit){
 /* ---- lavender: soft watercolor brush spike ---- */
 function drawLavender(g,f,cx,cy,S,ease,sp,col,time){
   const rng=mulberry(f.seed+7);
+  const tink=TC(sp.ink,f);
   const spikeLen=150*S*ease;
   const nF=26;
   for(let i=0;i<nF;i++){
@@ -317,7 +347,7 @@ function drawLavender(g,f,cx,cy,S,ease,sp,col,time){
     const wdt=(tt<0.15?tt/0.15:1-(tt-0.15)/0.85*0.85)*16*S+3;
     const fx=cx+Math.sin(tt*9+f.seed)*4*S+(rng()-0.5)*6*S;
     const fr=(4+rng()*6)*S*(0.7+tt*0.5);
-    const c=mixCol(col[0],col[1],rng());
+    const c=TC(mixCol(col[0],col[1],rng()),f);
     // watercolor dab
     g.globalAlpha=0.55+rng()*0.25;
     g.fillStyle=c;
@@ -325,7 +355,7 @@ function drawLavender(g,f,cx,cy,S,ease,sp,col,time){
     g.ellipse(fx,fy,fr*0.75,fr, (rng()-0.5)*0.8,0,6.2832);
     g.fill();
     g.globalAlpha=0.4;
-    g.fillStyle=col[1];
+    g.fillStyle=TC(col[1],f);
     g.beginPath();
     g.ellipse(fx-fr*0.2,fy-fr*0.25,fr*0.4,fr*0.45,0,0,6.2832);
     g.fill();
@@ -334,17 +364,17 @@ function drawLavender(g,f,cx,cy,S,ease,sp,col,time){
     const srng=mulberry((f.seed+i*13)|0);
     g.save();
     g.beginPath();g.ellipse(fx,fy,fr*0.75,fr,0,0,6.2832);g.clip();
-    stipple(g,fx,fy,fr,0.5,0.3,srng,sp.ink);
+    stipple(g,fx,fy,fr,0.5,0.3,srng,tink);
     g.restore();
     // tiny ink fleck
     if(rng()<0.4){
-      g.globalAlpha=0.5;g.fillStyle=sp.ink;
+      g.globalAlpha=0.5;g.fillStyle=tink;
       g.beginPath();g.arc(fx+(rng()-0.5)*fr,fy+(rng()-0.5)*fr,1.1,0,6.2832);g.fill();
       g.globalAlpha=1;
     }
   }
   // thin stem through spike
-  g.globalAlpha=0.7;g.strokeStyle=f.stemGreen;g.lineWidth=Math.max(1,2*S);
+  g.globalAlpha=0.7;g.strokeStyle=TC(f.stemGreen,f);g.lineWidth=Math.max(1,2*S);
   g.beginPath();g.moveTo(cx,cy);g.lineTo(cx,cy-spikeLen*1.02);g.stroke();
   g.globalAlpha=1;
 }
@@ -352,6 +382,7 @@ function drawLavender(g,f,cx,cy,S,ease,sp,col,time){
 /* ---- flower head ---- */
 function drawHead(g,f,cx,cy,S,ease,sp,col,time,szMul){
   const R=52*S*szMul*ease;
+  const tcol=[TC(col[0],f),TC(col[1],f)], tink=TC(sp.ink,f);
   const rng0=mulberry(f.seed);
   if(sp.shape==='lavender'){ drawLavender(g,f,cx,cy,S*szMul,ease,sp,col,time); return; }
   const layers=sp.layers||1;
@@ -362,25 +393,25 @@ function drawHead(g,f,cx,cy,S,ease,sp,col,time,szMul){
       const p=f.petals[(li*n+i)%f.petals.length];
       const open=ease*(li===0?1:0.72);
       const prng=mulberry((f.seed+i*77+li*31)|0);
-      petal(g,cx,cy,p.a+(li*0.35),R*p.len*lr,p.wid,col,sp.ink,prng,open,3);
+      petal(g,cx,cy,p.a+(li*0.35),R*p.len*lr,p.wid,tcol,tink,prng,open,3);
     }
   }
   const cr=R*0.30*ease;
   if(cr>1){
-    g.globalAlpha=0.85;g.fillStyle=sp.center[0];
+    g.globalAlpha=0.85;g.fillStyle=TC(sp.center[0],f);
     g.beginPath();g.arc(cx,cy,cr,0,6.2832);g.fill();
     g.globalAlpha=1;
     const crng=mulberry((f.seed+999)|0);
     g.save();g.beginPath();g.arc(cx,cy,cr,0,6.2832);g.clip();
-    stipple(g,cx,cy,cr,0.5,0.2,crng,sp.ink);
+    stipple(g,cx,cy,cr,0.5,0.2,crng,tink);
     g.restore();
-    g.strokeStyle=sp.ink;g.globalAlpha=0.5;g.lineWidth=Math.max(1,1.4*S);
+    g.strokeStyle=tink;g.globalAlpha=0.5;g.lineWidth=Math.max(1,1.4*S);
     const nSt=8;
     for(let i=0;i<nSt;i++){
       const a=(i/nSt)*6.2832+f.seed;
       g.beginPath();g.moveTo(cx+Math.cos(a)*cr*0.4,cy+Math.sin(a)*cr*0.4);
       g.lineTo(cx+Math.cos(a)*cr*1.5,cy+Math.sin(a)*cr*1.5);g.stroke();
-      g.globalAlpha=0.9;g.fillStyle=sp.center[1];
+      g.globalAlpha=0.9;g.fillStyle=TC(sp.center[1],f);
       g.beginPath();g.arc(cx+Math.cos(a)*cr*1.5,cy+Math.sin(a)*cr*1.5,Math.max(1,2.4*S),0,6.2832);g.fill();
       g.globalAlpha=0.5;
     }
@@ -406,19 +437,25 @@ function drawFlower(g,f,time){
   const phi=phiT*Math.min(1,f.grow*1.15);
   const dir=f.bendDir;
   const arcPt=t=>{
-    if(phi<0.001) return [bx, by-arcLen*t];
-    return [bx+dir*arcLen*(1-Math.cos(phi*t))/phi,
-            by-arcLen*Math.sin(phi*t)/phi];
+    let px,py;
+    if(phi<0.001){ px=bx; py=by-arcLen*t; }
+    else{
+      px=bx+dir*arcLen*(1-Math.cos(phi*t))/phi;
+      py=by-arcLen*Math.sin(phi*t)/phi;
+    }
+    return [px+f.swayX*t, py]; // sway grows toward tip, base stays planted
   };
   const [stemTopX,stemTopY]=arcPt(1);
+  f.headX=stemTopX; f.headY=stemTopY;
   const tipAngle=dir*phi; // rotate head to tip tangent
   const rng=mulberry(f.seed);
   const thick=Math.max(1,6*S*f.grow*f.thick);
+  const stemC=TC(f.stemGreen,f), stemC2=TC(shadeCol(f.stemGreen,0.2),f);
   // stem: smooth arc
   g.lineCap='round';
   for(let li=0;li<2;li++){
     g.globalAlpha=0.75-li*0.25;
-    g.strokeStyle=li?shadeCol(f.stemGreen,0.2):f.stemGreen;
+    g.strokeStyle=li?stemC2:stemC;
     g.lineWidth=Math.max(1,thick-li*2*S*f.thick);
     g.beginPath();
     const N=24;
@@ -437,13 +474,13 @@ function drawFlower(g,f,time){
     const ls=l.size*46*S*lt;
     if(ls<2)continue;
     g.save();g.translate(lx,ly);g.rotate(l.side*(l.ang+0.4));
-    g.globalAlpha=0.7; g.fillStyle=f.stemGreen;
+    g.globalAlpha=0.7; g.fillStyle=stemC;
     g.beginPath();
     g.moveTo(0,0);
     g.bezierCurveTo(ls*0.4,-ls*0.35, ls*0.9,-ls*0.25, ls,0);
     g.bezierCurveTo(ls*0.9,ls*0.25, ls*0.4,ls*0.35, 0,0);
     g.fill();
-    g.globalAlpha=0.4; g.strokeStyle=sp.ink; g.lineWidth=1;
+    g.globalAlpha=0.4; g.strokeStyle=TC(sp.ink,f); g.lineWidth=1;
     g.beginPath();g.moveTo(2,0);g.lineTo(ls*0.85,0);g.stroke();
     g.globalAlpha=1;
     const lrng=mulberry((f.seed+l.size*99)|0);
@@ -471,7 +508,7 @@ function drawFlower(g,f,time){
     const bang=br.side*(0.9+br.ang*0.5);
     const ex=sx+Math.sin(bang)*blen, ey=sy-Math.cos(bang)*blen*0.8;
     // branch stem
-    g.globalAlpha=0.7;g.strokeStyle=f.stemGreen;g.lineCap='round';
+    g.globalAlpha=0.7;g.strokeStyle=stemC;g.lineCap='round';
     g.lineWidth=Math.max(1,thick*0.55*be);
     g.beginPath();g.moveTo(sx,sy);
     g.quadraticCurveTo(sx+Math.sin(bang)*blen*0.5,sy-8,ex,ey);
@@ -485,12 +522,49 @@ function drawFlower(g,f,time){
 /* ---- seed ---- */
 function drawSeed(g,s){
   g.save();g.translate(s.x,s.y);g.rotate(s.rot);
-  g.fillStyle='#5c4a32';
+  g.fillStyle=TC('#5c4a32',null);
   g.beginPath();g.ellipse(0,0,4.5,6.5,0,0,6.2832);g.fill();
-  g.fillStyle='#7a6248';
+  g.fillStyle=TC('#7a6248',null);
   g.beginPath();g.ellipse(-1,-1.5,2,3,0.3,0,6.2832);g.fill();
   g.restore();
 }
+
+/* ================= mouse trail + brush physics ================= */
+let trail=[];
+function spawnTrail(x,y){
+  for(let i=0;i<2;i++){
+    if(trail.length>160) trail.shift();
+    trail.push({x:x+(Math.random()-0.5)*10, y:y+(Math.random()-0.5)*10,
+      vx:(Math.random()-0.5)*36, vy:(Math.random()-0.5)*36-24,
+      life:1, sz:1+Math.random()*2.4});
+  }
+}
+let pMX=null,pMY=null,pMT=0;
+function brushFlowers(x,y){
+  const now=performance.now();
+  if(pMX===null){pMX=x;pMY=y;pMT=now;return;}
+  const dtm=Math.max(8,now-pMT)/1000;
+  const vx=(x-pMX)/dtm, vy=(y-pMY)/dtm;
+  pMX=x;pMY=y;pMT=now;
+  spawnTrail(x,y);
+  const sp=Math.hypot(vx,vy);
+  if(sp<80) return;
+  for(const f of flowers){
+    const dx=x-f.headX, dy=y-f.headY;
+    const d=Math.hypot(dx,dy);
+    const R=110*f.scale+50;
+    if(d<R){
+      const fall=1-d/R;
+      f.swayV+=vx*fall*0.055*Math.min(1,sp/1600);
+      f.swayV=Math.max(-380,Math.min(380,f.swayV));
+    }
+  }
+}
+cv.addEventListener('mousemove',e=>brushFlowers(e.clientX,e.clientY));
+cv.addEventListener('touchmove',e=>{
+  const tc=e.touches[0];
+  if(tc) brushFlowers(tc.clientX,tc.clientY);
+},{passive:true});
 
 /* ================= backgrounds ================= */
 function drawBackground(g,time){
@@ -575,15 +649,23 @@ function render(time){
   const sorted=[...flowers].sort((a,b)=>a.scale-b.scale);
   for(const f of sorted) drawFlower(ctx,f,time);
   for(const s of seeds) drawSeed(ctx,s);
+  // mouse trail particles
+  for(const p of trail){
+    ctx.globalAlpha=p.life*0.45;
+    ctx.fillStyle='#8a8a8e';
+    ctx.beginPath();ctx.arc(p.x,p.y,Math.max(0.4,p.sz*p.life),0,6.2832);ctx.fill();
+  }
+  ctx.globalAlpha=1;
   requestAnimationFrame(render);
 }
 
 /* ================= flower generation ================= */
 function genFlower(speciesId,x,scale,rng,opts){
   const sp=SPECIES.find(s=>s.id===speciesId)||SPECIES[(rng()*SPECIES.length)|0];
+  const sd=(rng()*1e9)|0;
   const f={
     sp:sp.id, x, scale,
-    seed:(rng()*1e9)|0,
+    seed:sd,
     stemLen:(0.75+rng()*0.4)*opts.len,
     stemGreen:STEM_GREENS[(rng()*3)|0],
     growSpeed:GROW_SPEEDS[(rng()*3)|0]*opts.speed,
@@ -592,6 +674,8 @@ function genFlower(speciesId,x,scale,rng,opts){
     bendDir:rng()<0.5?-1:1,
     petals:[],leaves:[],branches:[],
     grow:0, swayPh:rng()*6.28,
+    swayX:0, swayV:0, headX:x, headY:groundY()-100,
+    monoBase:sp.cols[sd%sp.cols.length][0],
   };
   const nP=sp.petals[0]+((rng()*(sp.petals[1]-sp.petals[0]+1))|0);
   for(let i=0;i<nP;i++) f.petals.push({
@@ -675,8 +759,18 @@ function tick(time){
       if(r.y>H+20) rain.splice(i,1);
     }
   } else if(rain.length) rain=[];
+  // trail particles
+  for(let i=trail.length-1;i>=0;i--){
+    const p=trail[i];
+    p.life-=dt*1.7;
+    p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=50*dt;
+    if(p.life<=0) trail.splice(i,1);
+  }
+  // growth + sway spring physics
   for(const f of flowers){
     if(f.grow<1) f.grow=Math.min(1,f.grow+f.growSpeed*dt*3);
+    const a=-26*f.swayX-3.4*f.swayV;
+    f.swayV+=a*dt; f.swayX+=f.swayV*dt;
   }
   requestAnimationFrame(tick);
 }
