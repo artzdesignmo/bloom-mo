@@ -66,7 +66,7 @@ input[type=range]{ width:100%; accent-color:var(--accent); cursor:pointer; }
 /* hint bottom-left */
 #hint{
   position:fixed; left:16px; bottom:14px; z-index:40;
-  font-size:12px; color:var(--ink2); letter-spacing:1px; pointer-events:none;
+  font-size:6px; color:var(--ink2); letter-spacing:1px; pointer-events:none;
   text-shadow:0 1px 4px rgba(255,255,255,.9), 0 0 8px rgba(255,255,255,.7);
 }
 [data-theme="black"] #hint{ text-shadow:0 1px 4px rgba(0,0,0,.9); }
@@ -80,7 +80,7 @@ input[type=range]{ width:100%; accent-color:var(--accent); cursor:pointer; }
 </head>
 <body>
 <canvas id="cv"></canvas>
-<button id="gear" aria-label="settings">⚙️</button>
+<button id="gear" aria-label="settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8a8a8e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
 <div id="scrim"></div>
 <aside id="panel">
   <h1>BLOOM MO</h1>
@@ -94,12 +94,12 @@ input[type=range]{ width:100%; accent-color:var(--accent); cursor:pointer; }
   <div class="sec"><div class="lbl" id="lblSpecies">SPECIES</div><div class="chips" id="species"></div></div>
   <div class="sec"><div class="lbl" id="lblBg">BACKGROUND</div><div class="chips" id="bgs"></div></div>
   <div class="sec"><div class="lbl" id="lblGrow">GROWTH & STEM</div>
-    <div class="slider-row"><div class="row"><span class="nm" id="nmSpeed">Growth speed</span><span class="val" id="vSpeed"></span></div><input type="range" id="sSpeed" min="20" max="300" value="100"></div>
+    <div class="slider-row"><div class="row"><span class="nm" id="nmSpeed">Growth speed</span><span class="val" id="vSpeed"></span></div><input type="range" id="sSpeed" min="20" max="500" value="100"></div>
     <div class="slider-row"><div class="row"><span class="nm" id="nmThick">Stem thickness</span><span class="val" id="vThick"></span></div><input type="range" id="sThick" min="40" max="300" value="80"></div>
-    <div class="slider-row"><div class="row"><span class="nm" id="nmCurve">Stem curvature</span><span class="val" id="vCurve"></span></div><input type="range" id="sCurve" min="0" max="100" value="30"></div>
+    <div class="slider-row"><div class="row"><span class="nm" id="nmCurve">Stem curvature</span><span class="val" id="vCurve"></span></div><input type="range" id="sCurve" min="90" max="180" step="1" value="105"></div>
     <div class="slider-row"><div class="row"><span class="nm" id="nmLen">Stem length</span><span class="val" id="vLen"></span></div><input type="range" id="sLen" min="50" max="150" value="100"></div>
     <div class="slider-row"><div class="row"><span class="nm" id="nmCount">Flowers per stem</span><span class="val" id="vCount"></span></div><input type="range" id="sCount" min="1" max="5" step="1" value="1"></div>
-    <div class="slider-row"><div class="row"><span class="nm" id="nmSize">Flower size</span><span class="val" id="vSize"></span></div><input type="range" id="sSize" min="50" max="200" value="100"></div>
+    <div class="slider-row"><div class="row"><span class="nm" id="nmSize">Flower size</span><span class="val" id="vSize"></span></div><input type="range" id="sSize" min="50" max="300" value="100"></div>
   </div>
   <div class="sec"><div class="lbl" id="lblPref">PREFERENCES</div>
     <div class="hctl">
@@ -177,7 +177,7 @@ let curSpecies='any', curBg=0;
 const SL={
   speed:()=>+document.getElementById('sSpeed').value/100,
   thick:()=>+document.getElementById('sThick').value/100,
-  curve:()=>+document.getElementById('sCurve').value/100,
+  curve:()=>+document.getElementById('sCurve').value,
   len:()=>+document.getElementById('sLen').value/100,
   fcount:()=>+document.getElementById('sCount').value,
   size:()=>+document.getElementById('sSize').value/100,
@@ -185,7 +185,7 @@ const SL={
 function refreshVals(){
   document.getElementById('vSpeed').textContent=Math.round(SL.speed()*100)+'%';
   document.getElementById('vThick').textContent=Math.round(SL.thick()*100)+'%';
-  document.getElementById('vCurve').textContent=Math.round(SL.curve()*100)+'%';
+  document.getElementById('vCurve').textContent=Math.round(SL.curve())+'°';
   document.getElementById('vLen').textContent=Math.round(SL.len()*100)+'%';
   document.getElementById('vCount').textContent=SL.fcount();
   document.getElementById('vSize').textContent=Math.round(SL.size()*100)+'%';
@@ -388,42 +388,52 @@ function drawHead(g,f,cx,cy,S,ease,sp,col,time,szMul){
   }
 }
 
+/* ---- flower head, rotated to align with stem tip tangent ---- */
+function drawHeadAt(g,f,tx,ty,tipAngle,S,ease,sp,col,time,szMul){
+  g.save(); g.translate(tx,ty); g.rotate(tipAngle);
+  drawHead(g,f,0,0,S,ease,sp,col,time,szMul);
+  g.restore();
+}
+
 function drawFlower(g,f,time){
   const sp=SPECIES.find(s=>s.id===f.sp);
   const S=f.scale, gy=groundY();
   const sway=Math.sin(time*0.001+f.swayPh)*4*S;
   const bx=f.x+sway, by=gy;
-  const stemH=f.stemLen*H*0.52*f.grow;
-  const leanX=f.stemLean*60*S*f.grow;
-  const stemTopY=by-stemH, stemTopX=bx+leanX;
+  const arcLen=f.stemLen*H*0.52*f.grow;
+  // bend: 90° = straight up, 180° = tip horizontal; bends progressively as it grows
+  const phiT=(f.curve-90)*Math.PI/180;
+  const phi=phiT*Math.min(1,f.grow*1.15);
+  const dir=f.bendDir;
+  const arcPt=t=>{
+    if(phi<0.001) return [bx, by-arcLen*t];
+    return [bx+dir*arcLen*(1-Math.cos(phi*t))/phi,
+            by-arcLen*Math.sin(phi*t)/phi];
+  };
+  const [stemTopX,stemTopY]=arcPt(1);
+  const tipAngle=dir*phi; // rotate head to tip tangent
   const rng=mulberry(f.seed);
   const thick=Math.max(1,6*S*f.grow*f.thick);
-  const curve=f.curve;
-  // stem curve points
-  const cpx=bx+leanX*0.3+(rng()-0.5)*30*S*curve;
-  const cpy=by-stemH*0.6;
-  // stem
+  // stem: smooth arc
   g.lineCap='round';
   for(let li=0;li<2;li++){
     g.globalAlpha=0.75-li*0.25;
     g.strokeStyle=li?shadeCol(f.stemGreen,0.2):f.stemGreen;
     g.lineWidth=Math.max(1,thick-li*2*S*f.thick);
-    g.beginPath(); g.moveTo(bx+li*1.5,by);
-    g.quadraticCurveTo(cpx+li,cpy,stemTopX,stemTopY);
+    g.beginPath();
+    const N=24;
+    for(let k=0;k<=N;k++){
+      const [px,py]=arcPt(k/N);
+      if(k===0) g.moveTo(px+li*1.5,py); else g.lineTo(px+li*1.5,py);
+    }
     g.stroke();
   }
   g.globalAlpha=1;
-  // point on stem at param tt (approx quadratic)
-  const stemPt=tt=>{
-    const x=(1-tt)*(1-tt)*bx+2*(1-tt)*tt*cpx+tt*tt*stemTopX;
-    const y=(1-tt)*(1-tt)*by+2*(1-tt)*tt*cpy+tt*tt*stemTopY;
-    return [x,y];
-  };
   // leaves
   for(const l of f.leaves){
     if(f.grow<l.t) continue;
     const lt=Math.min(1,(f.grow-l.t)/(1-l.t)*2);
-    const [lx,ly]=stemPt(l.t*0.85);
+    const [lx,ly]=arcPt(l.t*0.85);
     const ls=l.size*46*S*lt;
     if(ls<2)continue;
     g.save();g.translate(lx,ly);g.rotate(l.side*(l.ang+0.4));
@@ -450,13 +460,13 @@ function drawFlower(g,f,time){
   const bloomP=Math.min(1,(f.grow-0.55)/0.45);
   const ease=1-Math.pow(1-bloomP,3);
   const col=sp.cols[f.seed%sp.cols.length];
-  // main head
-  drawHead(g,f,stemTopX,stemTopY,S,ease,sp,col,time,1);
+  // main head (aligned to tip tangent)
+  drawHeadAt(g,f,stemTopX,stemTopY,tipAngle,S,ease,sp,col,time,1);
   // branch flowers
   for(const br of f.branches){
     if(bloomP<br.t) continue;
     const be=1-Math.pow(1-Math.min(1,(bloomP-br.t)/(1-br.t)*1.6),3);
-    const [sx,sy]=stemPt(br.st);
+    const [sx,sy]=arcPt(br.st);
     const blen=70*S*br.len*be;
     const bang=br.side*(0.9+br.ang*0.5);
     const ex=sx+Math.sin(bang)*blen, ey=sy-Math.cos(bang)*blen*0.8;
@@ -466,7 +476,9 @@ function drawFlower(g,f,time){
     g.beginPath();g.moveTo(sx,sy);
     g.quadraticCurveTo(sx+Math.sin(bang)*blen*0.5,sy-8,ex,ey);
     g.stroke();g.globalAlpha=1;
-    drawHead(g,f,ex,ey,S,be,sp,col,time,br.sz);
+    // tip tangent of branch → head rotation
+    const txv=ex-(sx+Math.sin(bang)*blen*0.5), tyv=ey-(sy-8);
+    drawHeadAt(g,f,ex,ey,Math.atan2(txv,-tyv),S,be,sp,col,time,br.sz);
   }
 }
 
@@ -572,12 +584,12 @@ function genFlower(speciesId,x,scale,rng,opts){
   const f={
     sp:sp.id, x, scale,
     seed:(rng()*1e9)|0,
-    stemLean:(rng()-0.5)*0.5,
     stemLen:(0.75+rng()*0.4)*opts.len,
     stemGreen:STEM_GREENS[(rng()*3)|0],
     growSpeed:GROW_SPEEDS[(rng()*3)|0]*opts.speed,
     thick:opts.thick*(0.9+rng()*0.2),
     curve:opts.curve,
+    bendDir:rng()<0.5?-1:1,
     petals:[],leaves:[],branches:[],
     grow:0, swayPh:rng()*6.28,
   };
