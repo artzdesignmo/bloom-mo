@@ -2,7 +2,7 @@
 <html lang="en" data-theme="silver">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Bloom Mo — Generative Botanical Studio</title>
 <meta name="description" content="Bloom Mo: every flower grown from code. Japanese watercolor style, stipple shading.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,82 +15,117 @@
 [data-theme="white"]{ --bg:#f4f4f4; --panel:#ffffff; --card:#ffffff; --ink:#1c1c1e; --ink2:#6b6b6e; --line:#e2e2e2; }
 [data-theme="black"]{ --bg:#141414; --panel:#1e1e1e; --card:#242424; --ink:#f2f2f2; --ink2:#a8a8a8; --line:#333; }
 *{ box-sizing:border-box; margin:0; padding:0; }
-body{ font-family:'Noto Sans TC','Noto Sans',sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; }
-h1,.dela{ font-family:'Dela Gothic One',sans-serif; font-weight:400; }
-.topbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 22px; position:sticky; top:0; z-index:50; background:var(--bg); border-bottom:1px solid var(--line); }
-.brand .t{ font-family:'Dela Gothic One'; font-size:22px; letter-spacing:1px; }
-.brand .s{ font-size:11px; color:var(--ink2); letter-spacing:3px; margin-top:2px; }
-.hctl{ display:flex; align-items:center; gap:10px; }
-.seg{ display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:var(--card); }
-.seg button{ border:0; background:transparent; color:var(--ink2); padding:7px 13px; cursor:pointer; font-size:12px; font-weight:500; }
-.seg button.on{ background:var(--ink); color:var(--bg); }
-.tbtn{ width:32px; height:32px; border-radius:50%; border:1px solid var(--line); cursor:pointer; background:var(--card); font-size:14px; }
-.work{ max-width:1200px; margin:0 auto; padding:20px 22px 40px; }
-.stage{ position:relative; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
-#cv{ display:block; width:100%; height:62vh; min-height:420px; cursor:crosshair; }
-.hint{ position:absolute; bottom:12px; left:0; right:0; text-align:center; font-size:12px; color:var(--ink2); pointer-events:none; letter-spacing:1px; text-shadow:0 1px 3px rgba(255,255,255,.8); }
-.controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:16px; }
-.btn{ border:1px solid var(--line); background:var(--card); color:var(--ink); padding:10px 20px; border-radius:999px; cursor:pointer; font-size:14px; font-weight:500; }
+html,body{ height:100%; overflow:hidden; }
+body{ font-family:'Noto Sans TC','Noto Sans',sans-serif; background:var(--bg); color:var(--ink); }
+#cv{ position:fixed; inset:0; width:100vw; height:100vh; cursor:crosshair; display:block; }
+/* settings gear */
+#gear{
+  position:fixed; top:14px; left:14px; z-index:60;
+  width:44px; height:44px; border-radius:50%;
+  border:1px solid var(--line); background:var(--card); color:var(--ink);
+  font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 10px rgba(0,0,0,.12);
+}
+#gear:hover{ border-color:var(--ink2); }
+/* slide-in panel */
+#panel{
+  position:fixed; top:0; left:0; bottom:0; z-index:55;
+  width:min(340px,88vw); background:var(--panel); border-right:1px solid var(--line);
+  transform:translateX(-105%); transition:transform .32s cubic-bezier(.32,.72,.28,1);
+  overflow-y:auto; padding:70px 18px 24px; box-shadow:4px 0 24px rgba(0,0,0,.08);
+}
+#panel.open{ transform:translateX(0); }
+#panel h1{ font-family:'Dela Gothic One'; font-size:20px; letter-spacing:1px; }
+#panel .sub{ font-size:10px; color:var(--ink2); letter-spacing:3px; margin:2px 0 14px; }
+.sec{ margin-top:16px; }
+.sec .lbl{ font-size:11px; color:var(--ink2); letter-spacing:2px; margin-bottom:8px; }
+.chips{ display:flex; flex-wrap:wrap; gap:7px; }
+.chip{ border:1px solid var(--line); background:var(--card); border-radius:10px; padding:7px 12px; cursor:pointer; font-size:12.5px; color:var(--ink2); }
+.chip.on{ border-color:var(--accent); color:var(--ink); font-weight:600; }
+.slider-row{ margin:10px 0; }
+.slider-row .row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.slider-row .nm{ font-size:13px; }
+.slider-row .val{ font-size:12px; color:var(--ink2); min-width:38px; text-align:right; }
+input[type=range]{ width:100%; accent-color:var(--accent); cursor:pointer; }
+.btns{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+.btn{ border:1px solid var(--line); background:var(--card); color:var(--ink); padding:9px 16px; border-radius:999px; cursor:pointer; font-size:13px; font-weight:500; }
 .btn:hover{ border-color:var(--ink2); }
 .btn.primary{ background:var(--ink); color:var(--bg); border-color:var(--ink); font-weight:700; }
-.btn.primary:hover{ opacity:.88; }
-.species{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
-.sp{ border:1px solid var(--line); background:var(--card); border-radius:12px; padding:8px 14px; cursor:pointer; font-size:13px; color:var(--ink2); }
-.sp.on{ border-color:var(--accent); color:var(--ink); background:var(--panel); font-weight:600; }
-.sp .em{ margin-right:6px; }
-.bgs{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-.bg{ border:1px solid var(--line); background:var(--card); border-radius:12px; padding:8px 14px; cursor:pointer; font-size:13px; color:var(--ink2); }
-.bg.on{ border-color:var(--accent); color:var(--ink); background:var(--panel); font-weight:600; }
-.lbl{ font-size:12px; color:var(--ink2); letter-spacing:2px; margin-top:16px; }
-.count{ margin-left:auto; font-size:13px; color:var(--ink2); }
-footer{ text-align:center; padding:26px; font-size:12px; color:var(--ink2); letter-spacing:1px; }
-footer a{ color:var(--ink2); }
-@media (max-width:768px){
-  .topbar{ padding:10px 14px; } .brand .t{ font-size:18px; }
-  .work{ padding:12px 12px 30px; } #cv{ height:52vh; min-height:320px; }
-  .btn{ padding:11px 18px; font-size:15px; }
+.foot{ margin-top:22px; font-size:11px; color:var(--ink2); letter-spacing:1px; text-align:center; }
+.foot a{ color:var(--ink2); }
+.hctl{ display:flex; align-items:center; gap:8px; margin-top:6px; }
+.seg{ display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:var(--card); }
+.seg button{ border:0; background:transparent; color:var(--ink2); padding:6px 12px; cursor:pointer; font-size:12px; font-weight:500; }
+.seg button.on{ background:var(--ink); color:var(--bg); }
+.tbtn{ width:30px; height:30px; border-radius:50%; border:1px solid var(--line); cursor:pointer; }
+#scrim{
+  position:fixed; inset:0; z-index:54; background:rgba(0,0,0,.18);
+  opacity:0; pointer-events:none; transition:opacity .3s;
 }
+#scrim.show{ opacity:1; pointer-events:auto; }
+/* hint bottom-left */
+#hint{
+  position:fixed; left:16px; bottom:14px; z-index:40;
+  font-size:12px; color:var(--ink2); letter-spacing:1px; pointer-events:none;
+  text-shadow:0 1px 4px rgba(255,255,255,.9), 0 0 8px rgba(255,255,255,.7);
+}
+[data-theme="black"] #hint{ text-shadow:0 1px 4px rgba(0,0,0,.9); }
+#count{
+  position:fixed; right:16px; bottom:14px; z-index:40;
+  font-size:12px; color:var(--ink2); letter-spacing:1px; pointer-events:none;
+  text-shadow:0 1px 4px rgba(255,255,255,.9);
+}
+[data-theme="black"] #count{ text-shadow:0 1px 4px rgba(0,0,0,.9); }
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="brand"><div class="t">BLOOM MO</div><div class="s">GENERATIVE BOTANICAL STUDIO</div></div>
-  <div class="hctl">
-    <div class="seg" id="langSeg"><button data-l="en" class="on">EN</button><button data-l="zh">中</button></div>
-    <button class="tbtn" data-th="white" title="white" style="background:#fff"></button>
-    <button class="tbtn" data-th="silver" title="silver" style="background:#d8d8d8"></button>
-    <button class="tbtn" data-th="black" title="black" style="background:#222"></button>
-  </div>
-</div>
-<div class="work">
-  <div class="stage">
-    <canvas id="cv"></canvas>
-    <div class="hint" id="hint"></div>
-  </div>
-  <div class="controls">
+<canvas id="cv"></canvas>
+<button id="gear" aria-label="settings">⚙️</button>
+<div id="scrim"></div>
+<aside id="panel">
+  <h1>BLOOM MO</h1>
+  <div class="sub">GENERATIVE BOTANICAL STUDIO</div>
+  <div class="btns">
     <button class="btn primary" id="bGrow">🌱 Grow a flower</button>
     <button class="btn" id="bBouquet">💐 Surprise bouquet</button>
     <button class="btn" id="bClear">Clear</button>
     <button class="btn" id="bPng">Export PNG</button>
-    <span class="count" id="count"></span>
   </div>
-  <div class="lbl" id="lblSpecies">SPECIES</div>
-  <div class="species" id="species"></div>
-  <div class="lbl" id="lblBg">BACKGROUND</div>
-  <div class="bgs" id="bgs"></div>
-</div>
-<footer>BLOOM MO · <span id="footTx">every flower grown from code</span> · <a href="https://buymeacoffee.com/whynotartmoney" target="_blank" rel="noopener">Buy Me a Coffee</a></footer>
+  <div class="sec"><div class="lbl" id="lblSpecies">SPECIES</div><div class="chips" id="species"></div></div>
+  <div class="sec"><div class="lbl" id="lblBg">BACKGROUND</div><div class="chips" id="bgs"></div></div>
+  <div class="sec"><div class="lbl" id="lblGrow">GROWTH & STEM</div>
+    <div class="slider-row"><div class="row"><span class="nm" id="nmSpeed">Growth speed</span><span class="val" id="vSpeed"></span></div><input type="range" id="sSpeed" min="20" max="300" value="100"></div>
+    <div class="slider-row"><div class="row"><span class="nm" id="nmThick">Stem thickness</span><span class="val" id="vThick"></span></div><input type="range" id="sThick" min="40" max="300" value="80"></div>
+    <div class="slider-row"><div class="row"><span class="nm" id="nmCurve">Stem curvature</span><span class="val" id="vCurve"></span></div><input type="range" id="sCurve" min="0" max="100" value="30"></div>
+    <div class="slider-row"><div class="row"><span class="nm" id="nmLen">Stem length</span><span class="val" id="vLen"></span></div><input type="range" id="sLen" min="50" max="150" value="100"></div>
+    <div class="slider-row"><div class="row"><span class="nm" id="nmCount">Flowers per stem</span><span class="val" id="vCount"></span></div><input type="range" id="sCount" min="1" max="5" step="1" value="1"></div>
+    <div class="slider-row"><div class="row"><span class="nm" id="nmSize">Flower size</span><span class="val" id="vSize"></span></div><input type="range" id="sSize" min="50" max="200" value="100"></div>
+  </div>
+  <div class="sec"><div class="lbl" id="lblPref">PREFERENCES</div>
+    <div class="hctl">
+      <div class="seg" id="langSeg"><button data-l="en" class="on">EN</button><button data-l="zh">中</button></div>
+      <button class="tbtn" data-th="white" style="background:#fff" title="white"></button>
+      <button class="tbtn" data-th="silver" style="background:#d8d8d8" title="silver"></button>
+      <button class="tbtn" data-th="black" style="background:#222" title="black"></button>
+    </div>
+  </div>
+  <div class="foot">BLOOM MO · <span id="footTx"></span> · <a href="https://buymeacoffee.com/whynotartmoney" target="_blank" rel="noopener">Buy Me a Coffee</a></div>
+</aside>
+<div id="hint"></div>
+<div id="count"></div>
 <script>
 /* ================= i18n ================= */
 const STR={
   en:{grow:'🌱 Grow a flower',bouquet:'💐 Surprise bouquet',clear:'Clear',png:'Export PNG',
       hint:'click the garden to drop a seed · every bloom is unique',foot:'every flower grown from code',
-      count:n=>n+(n===1?' bloom':' blooms'),species:'SPECIES',bg:'BACKGROUND',
-      bgs:['Sunny sky','Light green','Gray dots','Transparent','Concrete wall','Rainy day','Cloudy']},
+      count:n=>n+(n===1?' bloom':' blooms'),species:'SPECIES',bg:'BACKGROUND',growSec:'GROWTH & STEM',pref:'PREFERENCES',
+      speed:'Growth speed',thick:'Stem thickness',curve:'Stem curvature',len:'Stem length',fcount:'Flowers per stem',size:'Flower size',
+      bgs:['Sunny sky','Light green','Gray dots','Watercolor paper','Concrete wall','Rainy day','Cloudy']},
   zh:{grow:'🌱 種一朵花',bouquet:'💐 驚喜花束',clear:'清空',png:'匯出 PNG',
       hint:'點擊花園掉下種子 · 每朵都獨一無二',foot:'每朵花都由代碼種出',
-      count:n=>n+' 朵花',species:'花種',bg:'背景',
-      bgs:['淺藍天晴天','淺綠','淺灰加點點','透明','水泥牆','下雨天','陰天']}
+      count:n=>n+' 朵花',species:'花種',bg:'背景',growSec:'生長與花枝',pref:'偏好設定',
+      speed:'生長速度',thick:'花枝粗細',curve:'花枝彎曲度',len:'花枝長度',fcount:'每枝花朵數',size:'花朵大小',
+      bgs:['淺藍天晴天','淺綠','淺灰加點點','水彩紙','水泥牆','下雨天','陰天']}
 };
 let lang='en';
 const t=k=>STR[lang][k];
@@ -105,6 +140,14 @@ function applyLang(){
   document.getElementById('footTx').textContent=t('foot');
   document.getElementById('lblSpecies').textContent=t('species');
   document.getElementById('lblBg').textContent=t('bg');
+  document.getElementById('lblGrow').textContent=t('growSec');
+  document.getElementById('lblPref').textContent=t('pref');
+  document.getElementById('nmSpeed').textContent=t('speed');
+  document.getElementById('nmThick').textContent=t('thick');
+  document.getElementById('nmCurve').textContent=t('curve');
+  document.getElementById('nmLen').textContent=t('len');
+  document.getElementById('nmCount').textContent=t('fcount');
+  document.getElementById('nmSize').textContent=t('size');
   updateCount();buildSpecies();buildBgs();
 }
 document.querySelectorAll('#langSeg button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;applyLang();});
@@ -123,30 +166,57 @@ const SPECIES=[
   {id:'sunflower',em:'🌻',en:'Sunflower',zh:'向日葵',petals:[20,28],layers:2,shape:'narrow',cols:[['#d9940d','#f5c542']],center:['#5c3a10','#3d2608'],ink:'#6b4a10'},
   {id:'orchid',em:'🌺',en:'Orchid',zh:'蘭花',petals:[6,6],layers:1,shape:'exotic',cols:[['#8e3aa0','#c47ad4'],['#6b2d8e','#a85fc0']],center:['#f5c542','#d9940d'],ink:'#4a1f5c'},
   {id:'lotus',em:'🪷',en:'Lotus',zh:'蓮花',petals:[14,20],layers:2,shape:'broad',cols:[['#d97a95','#f7c8d4'],['#e8e8e8','#f7f7f7']],center:['#f5c542','#eab308'],ink:'#7a4a55'},
-  {id:'lavender',em:'💜',en:'Lavender',zh:'薰衣草',petals:[0,0],layers:0,shape:'spike',cols:[['#7b5fc4','#a88fe0']],center:['#5c4a9b','#3d3270'],ink:'#4a3d7a'},
+  {id:'lavender',em:'💜',en:'Lavender',zh:'薰衣草',petals:[0,0],layers:0,shape:'lavender',cols:[['#8a6fd0','#b9a3e8'],['#7b5fc4','#a88fe0']],center:['#5c4a9b','#3d3270'],ink:'#4a3d7a'},
   {id:'tulip',em:'🌷',en:'Tulip',zh:'鬱金香',petals:[6,6],layers:1,shape:'cup',cols:[['#d94f5c','#f08a92'],['#eab308','#f5d547']],center:['#8e2f45','#5c1f2e'],ink:'#6b2230'},
   {id:'daisy',em:'🌼',en:'Wild Daisy',zh:'野雛菊',petals:[16,24],layers:2,shape:'narrow',cols:[['#f0f0e8','#ffffff']],center:['#eab308','#c47f0a'],ink:'#8a7a4a'},
 ];
-/* 3 stem greens, randomly assigned */
 const STEM_GREENS=['#2d6a4f','#3f8f5f','#6ba368'];
-/* 3 growth speeds: slow / medium / fast */
 const GROW_SPEEDS=[0.006,0.012,0.022];
 let curSpecies='any', curBg=0;
+/* sliders */
+const SL={
+  speed:()=>+document.getElementById('sSpeed').value/100,
+  thick:()=>+document.getElementById('sThick').value/100,
+  curve:()=>+document.getElementById('sCurve').value/100,
+  len:()=>+document.getElementById('sLen').value/100,
+  fcount:()=>+document.getElementById('sCount').value,
+  size:()=>+document.getElementById('sSize').value/100,
+};
+function refreshVals(){
+  document.getElementById('vSpeed').textContent=Math.round(SL.speed()*100)+'%';
+  document.getElementById('vThick').textContent=Math.round(SL.thick()*100)+'%';
+  document.getElementById('vCurve').textContent=Math.round(SL.curve()*100)+'%';
+  document.getElementById('vLen').textContent=Math.round(SL.len()*100)+'%';
+  document.getElementById('vCount').textContent=SL.fcount();
+  document.getElementById('vSize').textContent=Math.round(SL.size()*100)+'%';
+}
+['sSpeed','sThick','sCurve','sLen','sCount','sSize'].forEach(id=>
+  document.getElementById(id).addEventListener('input',refreshVals));
 function buildSpecies(){
   const el=document.getElementById('species');
   const all={id:'any',em:'🎲',en:lang==='zh'?'隨機':'Random',zh:'隨機'};
   el.innerHTML=[all,...SPECIES].map(s=>
-    `<button class="sp${curSpecies===s.id?' on':''}" data-s="${s.id}"><span class="em">${s.em}</span>${lang==='zh'?(s.zh||s.en):s.en}</button>`
+    `<button class="chip${curSpecies===s.id?' on':''}" data-s="${s.id}"><span class="em">${s.em}</span>${lang==='zh'?(s.zh||s.en):s.en}</button>`
   ).join('');
-  el.querySelectorAll('.sp').forEach(b=>b.onclick=()=>{curSpecies=b.dataset.s;buildSpecies();});
+  el.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{curSpecies=b.dataset.s;buildSpecies();});
 }
 function buildBgs(){
   const el=document.getElementById('bgs');
   el.innerHTML=t('bgs').map((n,i)=>
-    `<button class="bg${curBg===i?' on':''}" data-b="${i}">${n}</button>`
+    `<button class="chip${curBg===i?' on':''}" data-b="${i}">${n}</button>`
   ).join('');
-  el.querySelectorAll('.bg').forEach(b=>b.onclick=()=>{curBg=+b.dataset.b;buildBgs();});
+  el.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{curBg=+b.dataset.b;buildBgs();});
 }
+
+/* ================= panel ================= */
+const panel=document.getElementById('panel'), scrim=document.getElementById('scrim');
+function togglePanel(open){
+  const will=open!==undefined?open:!panel.classList.contains('open');
+  panel.classList.toggle('open',will);
+  scrim.classList.toggle('show',will);
+}
+document.getElementById('gear').onclick=()=>togglePanel();
+scrim.onclick=()=>togglePanel(false);
 
 /* ================= seeded random ================= */
 function mulberry(seed){
@@ -178,20 +248,18 @@ const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 let DPR=1,W=0,H=0,flowers=[],seeds=[],rain=[];
 function sizeCanvas(){
   DPR=Math.min(2,window.devicePixelRatio||1);
-  const r=cv.getBoundingClientRect();
-  W=r.width;H=r.height;
+  W=window.innerWidth;H=window.innerHeight;
   cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
 }
-function groundY(){ return H*0.92; }
+function groundY(){ return H*0.93; }
 
-/* ---- stipple: black/white dots for shading (replaces gradients) ---- */
+/* ---- stipple ---- */
 function stipple(g,cx,cy,r,dark,light,rng,ink){
   const n=Math.floor(r*r*0.06);
   for(let i=0;i<n;i++){
     const a=rng()*6.2832, d=Math.sqrt(rng())*r;
     const x=cx+Math.cos(a)*d, y=cy+Math.sin(a)*d;
-    // darker toward base (bottom), lighter toward tip
-    const shade=(y-cy)/r*0.5+0.5; // 0 top → 1 bottom
+    const shade=(y-cy)/r*0.5+0.5;
     const rr=rng();
     if(rr<shade*dark){
       g.fillStyle=ink; g.globalAlpha=0.28*rng()+0.12;
@@ -204,11 +272,10 @@ function stipple(g,cx,cy,r,dark,light,rng,ink){
   g.globalAlpha=1;
 }
 
-/* ---- watercolor petal: translucent wash + ink outline + stipple ---- */
+/* ---- watercolor petal ---- */
 function petal(g,cx,cy,angle,len,wid,col,ink,rng,open,jit){
   g.save();g.translate(cx,cy);g.rotate(angle);
   const L=len*open, Wd=wid*len;
-  // watercolor wash: 2 layered translucent fills with jittered edges
   for(let layer=0;layer<2;layer++){
     g.globalAlpha=0.55-layer*0.15;
     g.fillStyle=layer?col[1]:col[0];
@@ -220,14 +287,12 @@ function petal(g,cx,cy,angle,len,wid,col,ink,rng,open,jit){
     g.fill();
   }
   g.globalAlpha=1;
-  // ink outline (sumi-e touch)
   g.strokeStyle=ink; g.globalAlpha=0.45; g.lineWidth=1.1;
   g.beginPath();
   g.moveTo(0,0);
   g.bezierCurveTo(L*0.3,-Wd*0.7, L*0.7,-Wd*0.8, L*0.96,-Wd*0.08);
   g.stroke();
   g.globalAlpha=1;
-  // stipple shading
   const srng=mulberry((rng()*1e9)|0);
   g.save();
   g.beginPath();
@@ -240,30 +305,125 @@ function petal(g,cx,cy,angle,len,wid,col,ink,rng,open,jit){
   g.restore();
 }
 
+/* ---- lavender: soft watercolor brush spike ---- */
+function drawLavender(g,f,cx,cy,S,ease,sp,col,time){
+  const rng=mulberry(f.seed+7);
+  const spikeLen=150*S*ease;
+  const nF=26;
+  for(let i=0;i<nF;i++){
+    const tt=i/(nF-1);
+    const fy=cy-spikeLen*tt;
+    // brush profile: narrow at bottom, fuller middle, tapering top
+    const wdt=(tt<0.15?tt/0.15:1-(tt-0.15)/0.85*0.85)*16*S+3;
+    const fx=cx+Math.sin(tt*9+f.seed)*4*S+(rng()-0.5)*6*S;
+    const fr=(4+rng()*6)*S*(0.7+tt*0.5);
+    const c=mixCol(col[0],col[1],rng());
+    // watercolor dab
+    g.globalAlpha=0.55+rng()*0.25;
+    g.fillStyle=c;
+    g.beginPath();
+    g.ellipse(fx,fy,fr*0.75,fr, (rng()-0.5)*0.8,0,6.2832);
+    g.fill();
+    g.globalAlpha=0.4;
+    g.fillStyle=col[1];
+    g.beginPath();
+    g.ellipse(fx-fr*0.2,fy-fr*0.25,fr*0.4,fr*0.45,0,0,6.2832);
+    g.fill();
+    g.globalAlpha=1;
+    // stipple texture
+    const srng=mulberry((f.seed+i*13)|0);
+    g.save();
+    g.beginPath();g.ellipse(fx,fy,fr*0.75,fr,0,0,6.2832);g.clip();
+    stipple(g,fx,fy,fr,0.5,0.3,srng,sp.ink);
+    g.restore();
+    // tiny ink fleck
+    if(rng()<0.4){
+      g.globalAlpha=0.5;g.fillStyle=sp.ink;
+      g.beginPath();g.arc(fx+(rng()-0.5)*fr,fy+(rng()-0.5)*fr,1.1,0,6.2832);g.fill();
+      g.globalAlpha=1;
+    }
+  }
+  // thin stem through spike
+  g.globalAlpha=0.7;g.strokeStyle=f.stemGreen;g.lineWidth=Math.max(1,2*S);
+  g.beginPath();g.moveTo(cx,cy);g.lineTo(cx,cy-spikeLen*1.02);g.stroke();
+  g.globalAlpha=1;
+}
+
+/* ---- flower head ---- */
+function drawHead(g,f,cx,cy,S,ease,sp,col,time,szMul){
+  const R=52*S*szMul*ease;
+  const rng0=mulberry(f.seed);
+  if(sp.shape==='lavender'){ drawLavender(g,f,cx,cy,S*szMul,ease,sp,col,time); return; }
+  const layers=sp.layers||1;
+  for(let li=layers-1;li>=0;li--){
+    const lr=1-li*0.28;
+    const n=Math.max(3,Math.round(f.petals.length/layers));
+    for(let i=0;i<n;i++){
+      const p=f.petals[(li*n+i)%f.petals.length];
+      const open=ease*(li===0?1:0.72);
+      const prng=mulberry((f.seed+i*77+li*31)|0);
+      petal(g,cx,cy,p.a+(li*0.35),R*p.len*lr,p.wid,col,sp.ink,prng,open,3);
+    }
+  }
+  const cr=R*0.30*ease;
+  if(cr>1){
+    g.globalAlpha=0.85;g.fillStyle=sp.center[0];
+    g.beginPath();g.arc(cx,cy,cr,0,6.2832);g.fill();
+    g.globalAlpha=1;
+    const crng=mulberry((f.seed+999)|0);
+    g.save();g.beginPath();g.arc(cx,cy,cr,0,6.2832);g.clip();
+    stipple(g,cx,cy,cr,0.5,0.2,crng,sp.ink);
+    g.restore();
+    g.strokeStyle=sp.ink;g.globalAlpha=0.5;g.lineWidth=Math.max(1,1.4*S);
+    const nSt=8;
+    for(let i=0;i<nSt;i++){
+      const a=(i/nSt)*6.2832+f.seed;
+      g.beginPath();g.moveTo(cx+Math.cos(a)*cr*0.4,cy+Math.sin(a)*cr*0.4);
+      g.lineTo(cx+Math.cos(a)*cr*1.5,cy+Math.sin(a)*cr*1.5);g.stroke();
+      g.globalAlpha=0.9;g.fillStyle=sp.center[1];
+      g.beginPath();g.arc(cx+Math.cos(a)*cr*1.5,cy+Math.sin(a)*cr*1.5,Math.max(1,2.4*S),0,6.2832);g.fill();
+      g.globalAlpha=0.5;
+    }
+    g.globalAlpha=1;
+  }
+}
+
 function drawFlower(g,f,time){
   const sp=SPECIES.find(s=>s.id===f.sp);
   const S=f.scale, gy=groundY();
   const sway=Math.sin(time*0.001+f.swayPh)*4*S;
   const bx=f.x+sway, by=gy;
-  const stemTopY=gy-f.stemLen*H*0.52*f.grow;
-  const stemTopX=bx+f.stemLean*60*S*f.grow;
+  const stemH=f.stemLen*H*0.52*f.grow;
+  const leanX=f.stemLean*60*S*f.grow;
+  const stemTopY=by-stemH, stemTopX=bx+leanX;
   const rng=mulberry(f.seed);
-  // stem: watercolor stroke (two overlapping translucent lines)
+  const thick=Math.max(1,6*S*f.grow*f.thick);
+  const curve=f.curve;
+  // stem curve points
+  const cpx=bx+leanX*0.3+(rng()-0.5)*30*S*curve;
+  const cpy=by-stemH*0.6;
+  // stem
   g.lineCap='round';
   for(let li=0;li<2;li++){
     g.globalAlpha=0.75-li*0.25;
     g.strokeStyle=li?shadeCol(f.stemGreen,0.2):f.stemGreen;
-    g.lineWidth=Math.max(1.5,(6-li*2)*S*f.grow);
+    g.lineWidth=Math.max(1,thick-li*2*S*f.thick);
     g.beginPath(); g.moveTo(bx+li*1.5,by);
-    g.quadraticCurveTo(bx+f.stemLean*30*S+li, by-(gy-stemTopY)*0.6, stemTopX, stemTopY);
+    g.quadraticCurveTo(cpx+li,cpy,stemTopX,stemTopY);
     g.stroke();
   }
   g.globalAlpha=1;
+  // point on stem at param tt (approx quadratic)
+  const stemPt=tt=>{
+    const x=(1-tt)*(1-tt)*bx+2*(1-tt)*tt*cpx+tt*tt*stemTopX;
+    const y=(1-tt)*(1-tt)*by+2*(1-tt)*tt*cpy+tt*tt*stemTopY;
+    return [x,y];
+  };
   // leaves
   for(const l of f.leaves){
     if(f.grow<l.t) continue;
     const lt=Math.min(1,(f.grow-l.t)/(1-l.t)*2);
-    const lx=bx+f.stemLean*30*S*l.t*2, ly=by-(gy-stemTopY)*l.t;
+    const [lx,ly]=stemPt(l.t*0.85);
     const ls=l.size*46*S*lt;
     if(ls<2)continue;
     g.save();g.translate(lx,ly);g.rotate(l.side*(l.ang+0.4));
@@ -290,57 +450,27 @@ function drawFlower(g,f,time){
   const bloomP=Math.min(1,(f.grow-0.55)/0.45);
   const ease=1-Math.pow(1-bloomP,3);
   const col=sp.cols[f.seed%sp.cols.length];
-  const R=52*S*ease;
-  if(sp.shape==='spike'){
-    for(const b of f.buds){
-      if(bloomP<b.t*0.7) continue;
-      const px=stemTopX+(b.c-0.5)*10*S, py=stemTopY-(b.t*90*S)*((bloomP-b.t*0.7)/0.3+0.7);
-      const br=(5+b.s*4)*S*Math.min(1,(bloomP-b.t*0.7)*3);
-      if(br<=1)continue;
-      g.globalAlpha=0.75;
-      g.fillStyle=mixCol(col[0],col[1],b.c);
-      g.beginPath();g.ellipse(px,py,br*0.7,br,(b.c-0.5),0,6.2832);g.fill();
-      g.globalAlpha=1;
-    }
-    return;
-  }
-  const cx=stemTopX, cy=stemTopY;
-  const layers=sp.layers||1;
-  for(let li=layers-1;li>=0;li--){
-    const lr=1-li*0.28;
-    const n=Math.max(3,Math.round(f.petals.length/layers));
-    for(let i=0;i<n;i++){
-      const p=f.petals[(li*n+i)%f.petals.length];
-      const open=ease*(li===0?1:0.72);
-      const prng=mulberry((f.seed+i*77+li*31)|0);
-      petal(g,cx,cy,p.a+(li*0.35),R*p.len*lr,p.wid,col,sp.ink,prng,open,3);
-    }
-  }
-  const cr=R*0.30*ease;
-  if(cr>1){
-    g.globalAlpha=0.85;
-    g.fillStyle=sp.center[0];
-    g.beginPath();g.arc(cx,cy,cr,0,6.2832);g.fill();
-    g.globalAlpha=1;
-    const crng=mulberry((f.seed+999)|0);
-    g.save();g.beginPath();g.arc(cx,cy,cr,0,6.2832);g.clip();
-    stipple(g,cx,cy,cr,0.5,0.2,crng,sp.ink);
-    g.restore();
-    g.strokeStyle=sp.ink;g.globalAlpha=0.5;g.lineWidth=Math.max(1,1.4*S);
-    const nSt=8;
-    for(let i=0;i<nSt;i++){
-      const a=(i/nSt)*6.2832+f.seed;
-      g.beginPath();g.moveTo(cx+Math.cos(a)*cr*0.4,cy+Math.sin(a)*cr*0.4);
-      g.lineTo(cx+Math.cos(a)*cr*1.5,cy+Math.sin(a)*cr*1.5);g.stroke();
-      g.globalAlpha=0.9;g.fillStyle=sp.center[1];
-      g.beginPath();g.arc(cx+Math.cos(a)*cr*1.5,cy+Math.sin(a)*cr*1.5,Math.max(1,2.4*S),0,6.2832);g.fill();
-      g.globalAlpha=0.5;
-    }
-    g.globalAlpha=1;
+  // main head
+  drawHead(g,f,stemTopX,stemTopY,S,ease,sp,col,time,1);
+  // branch flowers
+  for(const br of f.branches){
+    if(bloomP<br.t) continue;
+    const be=1-Math.pow(1-Math.min(1,(bloomP-br.t)/(1-br.t)*1.6),3);
+    const [sx,sy]=stemPt(br.st);
+    const blen=70*S*br.len*be;
+    const bang=br.side*(0.9+br.ang*0.5);
+    const ex=sx+Math.sin(bang)*blen, ey=sy-Math.cos(bang)*blen*0.8;
+    // branch stem
+    g.globalAlpha=0.7;g.strokeStyle=f.stemGreen;g.lineCap='round';
+    g.lineWidth=Math.max(1,thick*0.55*be);
+    g.beginPath();g.moveTo(sx,sy);
+    g.quadraticCurveTo(sx+Math.sin(bang)*blen*0.5,sy-8,ex,ey);
+    g.stroke();g.globalAlpha=1;
+    drawHead(g,f,ex,ey,S,be,sp,col,time,br.sz);
   }
 }
 
-/* ---- seed: drops first, flower grows on landing ---- */
+/* ---- seed ---- */
 function drawSeed(g,s){
   g.save();g.translate(s.x,s.y);g.rotate(s.rot);
   g.fillStyle='#5c4a32';
@@ -354,20 +484,24 @@ function drawSeed(g,s){
 function drawBackground(g,time){
   const th=document.documentElement.dataset.theme;
   const dark=th==='black';
-  if(curBg===3){ // transparent → checkerboard hint
-    g.fillStyle=dark?'#1a1a1a':'#f0f0f0';g.fillRect(0,0,W,H);
-    g.fillStyle=dark?'#222':'#e2e2e2';
-    const s=28;
-    for(let y=0;y<H/s;y++)for(let x=0;x<W/s;x++)
-      if((x+y)%2===0)g.fillRect(x*s,y*s,s,s);
-  }else if(curBg===0){ // sunny light blue sky
+  if(curBg===3){ // watercolor paper
+    g.fillStyle=dark?'#241f16':'#f5f1e6';g.fillRect(0,0,W,H);
+    const rng=mulberry(7);
+    for(let i=0;i<2500;i++){
+      g.fillStyle=rng()<0.5?'rgba(120,100,70,.045)':'rgba(255,255,255,.05)';
+      g.fillRect(rng()*W,rng()*H,1+rng()*2,1+rng()*2);
+    }
+    // soft vignette
+    const vg=g.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.75);
+    vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,dark?'rgba(0,0,0,.28)':'rgba(120,100,70,.16)');
+    g.fillStyle=vg;g.fillRect(0,0,W,H);
+  }else if(curBg===0){ // sunny
     g.fillStyle=dark?'#16202c':'#cfe8f5';g.fillRect(0,0,W,H);
     const sg=g.createRadialGradient(W*0.82,H*0.16,10,W*0.82,H*0.16,H*0.45);
     sg.addColorStop(0,'rgba(255,240,180,.9)');sg.addColorStop(1,'rgba(255,240,180,0)');
     g.fillStyle=sg;g.fillRect(0,0,W,H);
     g.fillStyle=dark?'#ffdf80':'#f5c542';
     g.beginPath();g.arc(W*0.82,H*0.16,34,0,6.2832);g.fill();
-    // soft clouds
     g.fillStyle=dark?'rgba(255,255,255,.08)':'rgba(255,255,255,.75)';
     for(let i=0;i<3;i++){
       const cx=((time*0.008*(i+1))%(W+300))-150, cy=H*(0.12+i*0.09);
@@ -379,13 +513,13 @@ function drawBackground(g,time){
     }
   }else if(curBg===1){ // light green
     g.fillStyle=dark?'#14231a':'#e2f0da';g.fillRect(0,0,W,H);
-  }else if(curBg===2){ // light gray with dots
+  }else if(curBg===2){ // gray dots
     g.fillStyle=dark?'#1e1e1e':'#e8e8e8';g.fillRect(0,0,W,H);
     g.fillStyle=dark?'rgba(255,255,255,.10)':'rgba(0,0,0,.10)';
     for(let y=14;y<H;y+=28)for(let x=14;x<W;x+=28){
       g.beginPath();g.arc(x,y,1.6,0,6.2832);g.fill();
     }
-  }else if(curBg===4){ // concrete wall
+  }else if(curBg===4){ // concrete
     g.fillStyle=dark?'#232323':'#cfcfcb';g.fillRect(0,0,W,H);
     const rng=mulberry(42);
     for(let i=0;i<900;i++){
@@ -400,7 +534,7 @@ function drawBackground(g,time){
       for(let k=0;k<5;k++){x+=(rng()-0.5)*60;y+=rng()*40;g.lineTo(x,y);}
       g.stroke();
     }
-  }else if(curBg===5){ // rainy day
+  }else if(curBg===5){ // rainy
     g.fillStyle=dark?'#1a222c':'#b9c8d4';g.fillRect(0,0,W,H);
     g.strokeStyle=dark?'rgba(180,200,220,.35)':'rgba(90,110,130,.35)';
     g.lineWidth=1.2;
@@ -419,11 +553,8 @@ function drawBackground(g,time){
       g.fill();
     }
   }
-  // ground shadow
-  if(curBg!==3){
-    g.fillStyle=dark?'rgba(0,0,0,.25)':'rgba(60,80,60,.14)';
-    g.beginPath();g.ellipse(W/2,groundY()+H*0.05,W*0.72,H*0.075,0,0,6.2832);g.fill();
-  }
+  g.fillStyle=dark?'rgba(0,0,0,.25)':'rgba(60,80,60,.14)';
+  g.beginPath();g.ellipse(W/2,groundY()+H*0.05,W*0.72,H*0.075,0,0,6.2832);g.fill();
 }
 
 function render(time){
@@ -436,16 +567,18 @@ function render(time){
 }
 
 /* ================= flower generation ================= */
-function genFlower(speciesId,x,scale,rng){
+function genFlower(speciesId,x,scale,rng,opts){
   const sp=SPECIES.find(s=>s.id===speciesId)||SPECIES[(rng()*SPECIES.length)|0];
   const f={
     sp:sp.id, x, scale,
     seed:(rng()*1e9)|0,
     stemLean:(rng()-0.5)*0.5,
-    stemLen:0.75+rng()*0.4,
+    stemLen:(0.75+rng()*0.4)*opts.len,
     stemGreen:STEM_GREENS[(rng()*3)|0],
-    growSpeed:GROW_SPEEDS[(rng()*3)|0],
-    petals:[],leaves:[],buds:[],
+    growSpeed:GROW_SPEEDS[(rng()*3)|0]*opts.speed,
+    thick:opts.thick*(0.9+rng()*0.2),
+    curve:opts.curve,
+    petals:[],leaves:[],branches:[],
     grow:0, swayPh:rng()*6.28,
   };
   const nP=sp.petals[0]+((rng()*(sp.petals[1]-sp.petals[0]+1))|0);
@@ -456,9 +589,13 @@ function genFlower(speciesId,x,scale,rng){
   });
   const nL=2+((rng()*3)|0);
   for(let i=0;i<nL;i++) f.leaves.push({t:0.3+rng()*0.45,side:rng()<0.5?-1:1,size:0.5+rng()*0.6,ang:0.5+rng()*0.5});
-  if(sp.shape==='spike'){
-    const nb=10+((rng()*8)|0);
-    for(let i=0;i<nb;i++) f.buds.push({t:0.15+0.85*(i/nb),s:0.5+rng()*0.5,c:rng()});
+  const nb=opts.fcount-1;
+  for(let i=0;i<nb;i++){
+    f.branches.push({
+      st:0.45+rng()*0.35, t:0.55+rng()*0.25,
+      side:rng()<0.5?-1:1, ang:rng(),
+      len:0.6+rng()*0.5, sz:0.45+rng()*0.25,
+    });
   }
   return f;
 }
@@ -467,24 +604,27 @@ function genFlower(speciesId,x,scale,rng){
 function updateCount(){
   document.getElementById('count').textContent=t('count')(flowers.length);
 }
-/* drop a seed → on landing, flower grows */
-function dropSeed(x,species){
-  seeds.push({x, y:-12, vy:60, rot:Math.random()*6.28, vr:(Math.random()-0.5)*6, species});
+function curOpts(){
+  return {speed:SL.speed(),thick:SL.thick(),curve:SL.curve(),len:SL.len(),
+          fcount:SL.fcount(),size:SL.size()};
 }
-function plant(x,species){
-  dropSeed(x,species);
+/* seed drops FROM the click position */
+function plant(x,y,species){
+  if(y===undefined||y>groundY()-10) y=groundY()-10;
+  seeds.push({x, y:Math.max(0,y), vy:40, rot:Math.random()*6.28, vr:(Math.random()-0.5)*6,
+              species, opts:curOpts()});
 }
 document.getElementById('bGrow').onclick=()=>{
-  plant(W*(0.15+Math.random()*0.7),curSpecies);
+  plant(W*(0.15+Math.random()*0.7), H*0.25, curSpecies);
 };
 document.getElementById('bBouquet').onclick=()=>{
   const n=5+((Math.random()*4)|0);
-  for(let i=0;i<n;i++) setTimeout(()=>plant(W*(0.12+0.76*(i/(n-1)))+(Math.random()-0.5)*40,'any'),i*450);
+  for(let i=0;i<n;i++) setTimeout(()=>plant(W*(0.12+0.76*(i/(n-1)))+(Math.random()-0.5)*40,H*0.25,'any'),i*450);
 };
 document.getElementById('bClear').onclick=()=>{flowers=[];seeds=[];updateCount();};
 cv.addEventListener('click',e=>{
-  const r=cv.getBoundingClientRect();
-  plant(e.clientX-r.left,curSpecies);
+  if(panel.classList.contains('open')) return;
+  plant(e.clientX,e.clientY,curSpecies);
 });
 document.getElementById('bPng').onclick=()=>{
   const ex=document.createElement('canvas');
@@ -497,12 +637,11 @@ document.getElementById('bPng').onclick=()=>{
   a.click();
 };
 
-/* ================= main loop: seeds fall, flowers grow ================= */
+/* ================= main loop ================= */
 let lastT=0;
 function tick(time){
   const dt=Math.min(0.05,(time-lastT)/1000||0.016);
   lastT=time;
-  // seeds
   for(let i=seeds.length-1;i>=0;i--){
     const s=seeds[i];
     s.vy+=900*dt; s.y+=s.vy*dt; s.rot+=s.vr*dt;
@@ -510,13 +649,12 @@ function tick(time){
       seeds.splice(i,1);
       const rng=mulberry((Math.random()*1e9)|0);
       const sid=s.species==='any'?SPECIES[(rng()*SPECIES.length)|0].id:s.species;
-      const f=genFlower(sid,s.x,0.7+rng()*0.7,rng);
+      const f=genFlower(sid,s.x,(0.7+rng()*0.7)*s.opts.size,rng,s.opts);
       flowers.push(f);
       if(flowers.length>24) flowers.shift();
       updateCount();
     }
   }
-  // rain
   if(curBg===5){
     if(rain.length<120&&Math.random()<0.6)
       rain.push({x:Math.random()*(W+40),y:-20});
@@ -525,7 +663,6 @@ function tick(time){
       if(r.y>H+20) rain.splice(i,1);
     }
   } else if(rain.length) rain=[];
-  // growth
   for(const f of flowers){
     if(f.grow<1) f.grow=Math.min(1,f.grow+f.growSpeed*dt*3);
   }
@@ -533,10 +670,10 @@ function tick(time){
 }
 
 /* ================= boot ================= */
-applyTheme();applyLang();buildSpecies();buildBgs();updateCount();
+applyTheme();applyLang();buildSpecies();buildBgs();refreshVals();updateCount();
 sizeCanvas();
 window.addEventListener('resize',sizeCanvas);
-setTimeout(()=>{for(let i=0;i<3;i++)setTimeout(()=>plant(W*(0.25+0.25*i),'any'),i*500);},600);
+setTimeout(()=>{for(let i=0;i<3;i++)setTimeout(()=>plant(W*(0.25+0.25*i),H*0.25,'any'),i*500);},600);
 requestAnimationFrame(render);
 requestAnimationFrame(tick);
 </script>
