@@ -906,8 +906,10 @@ function drawFlower(g,f,time){
   const vm=vaseMetrics(f);
   // vase first (behind stem)
   if(vm) drawVase(g,f,vm);
+  const vg=f.vaseGrow===undefined?1:f.vaseGrow;
   const sway=Math.sin(time*0.001+f.swayPh)*4*S;
-  const bx=f.x+sway, by=vm?vm.mouthY:gy;
+  // with a vase: base locked to the (animated) vase mouth, no ambient sway
+  const bx=f.x+(vm?0:sway), by=vm?(vm.baseY-vm.h*vg*0.97):gy;
   const arcLen=f.stemLen*H*0.52*f.grow;
   // bend: 90° = straight up, 180° = tip horizontal; bends progressively as it grows
   const phiT=(f.curve-90)*Math.PI/180;
@@ -1116,8 +1118,8 @@ function render(time){
   ctx.setTransform(DPR,0,0,DPR,0,0);
   drawBackground(ctx,time);
   const sorted=[...flowers].sort((a,b)=>a.scale-b.scale);
-  for(const f of sorted) drawFlower(ctx,f,time);
-  for(const s of seeds) drawSeed(ctx,s);
+  for(const f of sorted){ try{ drawFlower(ctx,f,time); }catch(e){} }
+  for(const s of seeds){ try{ drawSeed(ctx,s); }catch(e){} }
   // mouse trail particles
   for(const p of trail){
     ctx.globalAlpha=p.life*0.45;
