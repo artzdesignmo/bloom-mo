@@ -94,6 +94,7 @@ input[type=range]{ width:100%; accent-color:var(--accent); cursor:pointer; }
   <div class="sec"><div class="lbl" id="lblSpecies">SPECIES</div><div class="chips" id="species"></div></div>
   <div class="sec"><div class="lbl" id="lblStyle">ART STYLE</div><div class="chips" id="styles"></div></div>
   <div class="sec"><div class="lbl" id="lblVase">VASE</div><div class="chips" id="vases"></div></div>
+  <div class="sec"><div class="lbl" id="lblForm">FORM</div><div class="chips" id="forms"></div></div>
   <div class="sec"><div class="lbl" id="lblBg">BACKGROUND</div><div class="chips" id="bgs"></div></div>
   <div class="sec"><div class="lbl" id="lblTone">TONE</div><div class="chips" id="tones"></div></div>
   <div class="sec"><div class="lbl" id="lblGrow">GROWTH & STEM</div>
@@ -127,6 +128,8 @@ const STR={
       style:'ART STYLE',vase:'VASE',
       styles:[{n:'Watercolor'},{n:'Flat Geo'},{n:'Pop'},{n:'Risograph'},{n:'Dream Blur'},{n:'Line'}],
       vases:[{n:'None'},{n:'Blue Round'},{n:'Mustard Zigzag'},{n:'Orange Round'},{n:'Green Bottle'},{n:'Pink Jug'},{n:'Wavy'},{n:'Bubble'},{n:'Ribbed'},{n:'Pink Round'}],
+      form:'FORM',
+      forms:[{n:'Radial'},{n:'Cup'},{n:'Pom'},{n:'Spike'}],
       bgs:['Sunny sky','Light green','Gray dots','Watercolor paper','Concrete wall','Rainy day','Cloudy','Black','White']},
   zh:{grow:'🌱 種一朵花',bouquet:'💐 驚喜花束',clear:'清空',png:'匯出 PNG',
       hint:'點擊花園掉下種子 · 每朵都獨一無二',foot:'每朵花都由代碼種出',
@@ -136,6 +139,8 @@ const STR={
       style:'畫風',vase:'花瓶',
       styles:[{n:'水彩'},{n:'扁平幾何'},{n:'普普'},{n:'孔版印刷'},{n:'柔焦'},{n:'線條'}],
       vases:[{n:'無'},{n:'藍圓瓶'},{n:'芥末鋸齒瓶'},{n:'橙紅圓瓶'},{n:'深綠細頸瓶'},{n:'粉紅把手壺'},{n:'波浪瓶'},{n:'泡泡瓶'},{n:'玻璃紋瓶'},{n:'粉圓瓶'}],
+      form:'形態',
+      forms:[{n:'放射'},{n:'杯狀'},{n:'球狀'},{n:'穗狀'}],
       bgs:['淺藍天晴天','淺綠','淺灰加點點','水彩紙','水泥牆','下雨天','陰天','黑色','白色']}
 };
 let lang='en';
@@ -152,6 +157,7 @@ function applyLang(){
   document.getElementById('lblSpecies').textContent=t('species');
   document.getElementById('lblStyle').textContent=t('style');
   document.getElementById('lblVase').textContent=t('vase');
+  document.getElementById('lblForm').textContent=t('form');
   document.getElementById('lblBg').textContent=t('bg');
   document.getElementById('lblTone').textContent=t('tone');
   document.getElementById('lblGrow').textContent=t('growSec');
@@ -162,7 +168,7 @@ function applyLang(){
   document.getElementById('nmLen').textContent=t('len');
   document.getElementById('nmCount').textContent=t('fcount');
   document.getElementById('nmSize').textContent=t('size');
-  updateCount();buildSpecies();buildStyles();buildVases();buildBgs();buildTones();
+  updateCount();buildSpecies();buildStyles();buildVases();buildForms();buildBgs();buildTones();
 }
 document.querySelectorAll('#langSeg button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;applyLang();});
 /* ================= theme ================= */
@@ -256,6 +262,16 @@ function buildBgs(){
   el.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{curBg=+b.dataset.b;buildBgs();});
 }
 
+/* ================= flower forms (from reference images) ================= */
+const FORM_IDS=['radial','cup','pom','spike'];
+let curForm='radial';
+function buildForms(){
+  const el=document.getElementById('forms');
+  el.innerHTML=t('forms').map((s,i)=>
+    `<button class="chip${curForm===FORM_IDS[i]?' on':''}" data-fo="${FORM_IDS[i]}">${s.n}</button>`
+  ).join('');
+  el.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{curForm=b.dataset.fo;buildForms();});
+}
 /* ================= art styles (from reference images) ================= */
 const ART_IDS=['watercolor','flat','pop','riso','blur','line'];
 let curStyle='watercolor';
@@ -293,7 +309,7 @@ function vaseMetrics(f){
   const v=vaseDef(f.vase);
   if(!v||v.id==='none') return null;
   const S=f.scale, w=110*S, h=150*S, by=groundY();
-  return {x:f.x, w, h, mouthX:f.x, mouthY:by-h+h*0.03, mouthHW:v.mouth*w, v};
+  return {x:f.x, baseY:by, w, h, mouthX:f.x, mouthY:by-h+h*0.03, mouthHW:v.mouth*w, v};
 }
 const panel=document.getElementById('panel'), scrim=document.getElementById('scrim');
 function togglePanel(open){
@@ -440,8 +456,8 @@ function petal(g,cx,cy,angle,len,wid,col,ink,rng,open,jit,f){
   g.restore();
 }
 
-/* ---- lavender spike (6 art styles) ---- */
-function drawLavender(g,f,cx,cy,S,ease,sp,col,time){
+/* ---- spike form (generic lavender-style spike) ---- */
+function drawSpike(g,f,cx,cy,S,ease,sp,col,time){
   const st=f&&f.style?f.style:'watercolor';
   const rng=mulberry(f.seed+7);
   const tink=TC(sp.ink,f);
@@ -532,12 +548,142 @@ function drawLavender(g,f,cx,cy,S,ease,sp,col,time){
   g.globalAlpha=1;
 }
 
+/* ---- cup form: tulip-like cup viewed from the side ---- */
+function drawCup(g,f,cx,cy,S,ease,sp,col,time){
+  const st=f.style||'watercolor';
+  const tink=TC(sp.ink,f);
+  const c0=TC(col[0],f), c1=TC(col[1],f);
+  const R=58*S*ease, Wd=R*0.82;
+  const rng=mulberry(f.seed+55);
+  const bodyPath=()=>{
+    g.beginPath();
+    g.moveTo(cx-Wd, cy-R*0.98);
+    g.bezierCurveTo(cx-Wd*1.06, cy-R*0.55, cx-Wd*0.72, cy-R*0.12, cx, cy);
+    g.bezierCurveTo(cx+Wd*0.72, cy-R*0.12, cx+Wd*1.06, cy-R*0.55, cx+Wd, cy-R*0.98);
+    g.closePath();
+  };
+  const blurred=st==='blur';
+  if(blurred){ g.save(); g.filter='blur(5px)'; }
+  if(st==='line'){
+    bodyPath(); g.lineWidth=1.4; g.strokeStyle=tink; g.globalAlpha=0.9; g.stroke(); g.globalAlpha=1;
+  }else{
+    if(st==='riso'){ g.save(); g.translate(2.5,-2); bodyPath(); g.globalAlpha=0.3; g.fillStyle=tink; g.fill(); g.restore(); }
+    bodyPath();
+    g.fillStyle=blurred?mixWhite(c0,0.3):c0;
+    g.fill();
+    if(st==='watercolor'){
+      g.save(); bodyPath(); g.clip();
+      g.globalAlpha=0.4; g.fillStyle=mixWhite(c1,0.3);
+      g.fillRect(cx-Wd,cy-R,Wd*2,R); g.globalAlpha=1;
+      stipple(g,cx,cy-R*0.5,Wd*0.8,0.5,0.25,mulberry((f.seed+56)|0),tink);
+      g.restore();
+      bodyPath(); g.lineWidth=1.2; g.strokeStyle=tink; g.globalAlpha=0.5; g.stroke(); g.globalAlpha=1;
+    }
+    if(st==='pop'){ bodyPath(); g.lineWidth=2.4; g.strokeStyle='#2b2b2b'; g.stroke(); }
+    if(st==='riso'){
+      g.save(); bodyPath(); g.clip();
+      grain(g,cx,cy-R*0.5,Wd*0.8,mulberry((f.seed+56)|0),1);
+      g.restore();
+    }
+  }
+  if(blurred) g.restore();
+  // petal seams
+  if(st==='watercolor'||st==='line'){
+    g.strokeStyle=tink; g.globalAlpha=st==='line'?0.7:0.35; g.lineWidth=1.1;
+    for(const off of [-0.45,0,0.45]){
+      g.beginPath();
+      g.moveTo(cx+off*Wd, cy-R*0.95);
+      g.quadraticCurveTo(cx+off*Wd*1.15, cy-R*0.5, cx+off*Wd*0.5, cy-R*0.06);
+      g.stroke();
+    }
+    g.globalAlpha=1;
+  }
+  // petal tips above the rim
+  const nTip=5;
+  for(let i=0;i<nTip;i++){
+    const t=i/(nTip-1);
+    const tx=cx+(t-0.5)*Wd*1.7;
+    const th=R*(0.26+0.12*Math.sin(t*Math.PI+1));
+    const tcol=TC(mixCol(col[0],col[1],rng()),f);
+    if(st==='line'){
+      g.strokeStyle=tink; g.lineWidth=1.2; g.globalAlpha=0.85;
+      g.beginPath(); g.moveTo(tx-Wd*0.14,cy-R*0.95);
+      g.quadraticCurveTo(tx,cy-R*0.95-th, tx+Wd*0.14,cy-R*0.95); g.stroke(); g.globalAlpha=1;
+    }else{
+      const tipBlur=st==='blur';
+      if(tipBlur){ g.save(); g.filter='blur(4px)'; }
+      g.fillStyle=tipBlur?mixWhite(tcol,0.3):tcol;
+      g.beginPath(); g.moveTo(tx-Wd*0.16,cy-R*0.92);
+      g.quadraticCurveTo(tx,cy-R*0.92-th*1.15, tx+Wd*0.16,cy-R*0.92);
+      g.quadraticCurveTo(tx,cy-R*0.88, tx-Wd*0.16,cy-R*0.92);
+      g.fill();
+      if(tipBlur) g.restore(); else if(st==='pop'){ g.lineWidth=1.8; g.strokeStyle='#2b2b2b'; g.stroke(); }
+    }
+  }
+}
+
+/* ---- pom form: spherical pom-pom / allium cluster ---- */
+function drawPom(g,f,cx,cy,S,ease,sp,col,time){
+  const st=f.style||'watercolor';
+  const tink=TC(sp.ink,f);
+  const R=44*S*ease;
+  const cyy=cy-R*0.55; // sit atop the stem
+  const rng=mulberry(f.seed+77);
+  const fl=[];
+  const n=46;
+  for(let i=0;i<n;i++){
+    const a=rng()*6.2832, d=Math.sqrt(rng());
+    fl.push({
+      x:Math.cos(a)*d*R, y:Math.sin(a)*d*R*0.92,
+      r:(2.2+rng()*3.4)*S*(1-d*0.3),
+      c:TC(mixCol(col[0],col[1],rng()),f)
+    });
+  }
+  fl.sort((a,b)=>a.y-b.y);
+  const blurred=st==='blur';
+  if(blurred){ g.save(); g.filter='blur(4px)'; }
+  for(const p of fl){
+    const px=cx+p.x, py=cyy+p.y;
+    if(st==='line'){
+      g.lineWidth=1; g.strokeStyle=tink; g.globalAlpha=0.7;
+      g.beginPath(); g.arc(px,py,Math.max(0.8,p.r*0.8),0,6.2832); g.stroke(); g.globalAlpha=1;
+    }else{
+      if(st==='riso'){
+        g.globalAlpha=0.3; g.fillStyle=tink;
+        g.beginPath(); g.arc(px+1.5,py-1,p.r,0,6.2832); g.fill();
+      }
+      g.globalAlpha=st==='watercolor'?0.8:0.95;
+      g.fillStyle=blurred?mixWhite(p.c,0.3):p.c;
+      g.beginPath(); g.arc(px,py,p.r,0,6.2832); g.fill();
+      g.globalAlpha=1;
+      if(st==='pop'){
+        g.lineWidth=1.4; g.strokeStyle='#2b2b2b';
+        g.beginPath(); g.arc(px,py,p.r,0,6.2832); g.stroke();
+      }
+    }
+  }
+  if(blurred) g.restore();
+  if(st==='watercolor'){
+    g.save(); g.beginPath(); g.arc(cx,cyy,R,0,6.2832); g.clip();
+    stipple(g,cx,cyy,R,0.45,0.2,mulberry((f.seed+78)|0),tink);
+    g.restore();
+  }
+  if(st==='riso'){
+    g.save(); g.beginPath(); g.arc(cx,cyy,R,0,6.2832); g.clip();
+    grain(g,cx,cyy,R,mulberry((f.seed+78)|0),1);
+    g.restore();
+  }
+}
+
 /* ---- flower head ---- */
 function drawHead(g,f,cx,cy,S,ease,sp,col,time,szMul){
+  const form=f.form||'radial';
+  if(form==='spike'){ drawSpike(g,f,cx,cy,S*szMul,ease,sp,col,time); return; }
+  if(form==='cup'){ drawCup(g,f,cx,cy,S*szMul,ease,sp,col,time); return; }
+  if(form==='pom'){ drawPom(g,f,cx,cy,S*szMul,ease,sp,col,time); return; }
   const R=52*S*szMul*ease;
   const tcol=[TC(col[0],f),TC(col[1],f)], tink=TC(sp.ink,f);
   const rng0=mulberry(f.seed);
-  if(sp.shape==='lavender'){ drawLavender(g,f,cx,cy,S*szMul,ease,sp,col,time); return; }
   const layers=sp.layers||1;
   for(let li=layers-1;li>=0;li--){
     const lr=1-li*0.28;
@@ -983,7 +1129,7 @@ function render(time){
 }
 
 /* ================= flower generation ================= */
-function genFlower(speciesId,x,scale,rng,opts,styleId,vaseId){
+function genFlower(speciesId,x,scale,rng,opts,styleId,vaseId,formId){
   const sp=SPECIES.find(s=>s.id===speciesId)||SPECIES[(rng()*SPECIES.length)|0];
   const sd=(rng()*1e9)|0;
   const f={
@@ -991,6 +1137,7 @@ function genFlower(speciesId,x,scale,rng,opts,styleId,vaseId){
     seed:sd,
     style:styleId||'watercolor',
     vase:vaseId||'none',
+    form:formId||'radial',
     locked:true, vaseGrow:0,
     stemLen:(0.75+rng()*0.4)*opts.len,
     stemGreen:STEM_GREENS[(rng()*3)|0],
@@ -1036,7 +1183,7 @@ function plant(x,y,species){
   if(y===undefined||y>groundY()-10) y=groundY()-10;
   const rng=mulberry((Math.random()*1e9)|0);
   const sid=species==='any'?SPECIES[(rng()*SPECIES.length)|0].id:species;
-  const f=genFlower(sid,x,(0.7+rng()*0.7)*SL.size(),rng,curOpts(),curStyle,curVase);
+  const f=genFlower(sid,x,(0.7+rng()*0.7)*SL.size(),rng,curOpts(),curStyle,curVase,curForm);
   const vm=vaseMetrics(f);
   const targetY=vm?vm.mouthY:groundY()-4;
   flowers.push(f);
