@@ -95,8 +95,8 @@ input[type=range]{ width:100%; accent-color:var(--accent); cursor:pointer; }
   <div class="sec"><div class="lbl" id="lblBg">BACKGROUND</div><div class="chips" id="bgs"></div></div>
   <div class="sec"><div class="lbl" id="lblTone">TONE</div><div class="chips" id="tones"></div></div>
   <div class="sec"><div class="lbl" id="lblGrow">GROWTH & STEM</div>
-    <div class="slider-row"><div class="row"><span class="nm" id="nmSpeed">Growth speed</span><span class="val" id="vSpeed"></span></div><input type="range" id="sSpeed" min="20" max="500" value="100"></div>
-    <div class="slider-row"><div class="row"><span class="nm" id="nmThick">Stem thickness</span><span class="val" id="vThick"></span></div><input type="range" id="sThick" min="40" max="300" value="80"></div>
+    <div class="slider-row"><div class="row"><span class="nm" id="nmSpeed">Growth speed</span><span class="val" id="vSpeed"></span></div><input type="range" id="sSpeed" min="20" max="500" value="222"></div>
+    <div class="slider-row"><div class="row"><span class="nm" id="nmThick">Stem thickness</span><span class="val" id="vThick"></span></div><input type="range" id="sThick" min="40" max="300" value="60"></div>
     <div class="slider-row"><div class="row"><span class="nm" id="nmCurve">Stem curvature</span><span class="val" id="vCurve"></span></div><input type="range" id="sCurve" min="90" max="180" step="1" value="105"></div>
     <div class="slider-row"><div class="row"><span class="nm" id="nmLen">Stem length</span><span class="val" id="vLen"></span></div><input type="range" id="sLen" min="50" max="150" value="100"></div>
     <div class="slider-row"><div class="row"><span class="nm" id="nmCount">Flowers per stem</span><span class="val" id="vCount"></span></div><input type="range" id="sCount" min="1" max="5" step="1" value="1"></div>
@@ -122,13 +122,13 @@ const STR={
       count:n=>n+(n===1?' bloom':' blooms'),species:'SPECIES',bg:'BACKGROUND',tone:'TONE',growSec:'GROWTH & STEM',pref:'PREFERENCES',
       speed:'Growth speed',thick:'Stem thickness',curve:'Stem curvature',len:'Stem length',fcount:'Flowers per stem',size:'Flower size',
       tones:['Color','Mono','B&W'],
-      bgs:['Sunny sky','Light green','Gray dots','Watercolor paper','Concrete wall','Rainy day','Cloudy']},
+      bgs:['Sunny sky','Light green','Gray dots','Watercolor paper','Concrete wall','Rainy day','Cloudy','Black','White']},
   zh:{grow:'🌱 種一朵花',bouquet:'💐 驚喜花束',clear:'清空',png:'匯出 PNG',
       hint:'點擊花園掉下種子 · 每朵都獨一無二',foot:'每朵花都由代碼種出',
       count:n=>n+' 朵花',species:'花種',bg:'背景',tone:'色調',growSec:'生長與花枝',pref:'偏好設定',
       speed:'生長速度',thick:'花枝粗細',curve:'花枝彎曲度',len:'花枝長度',fcount:'每枝花朵數',size:'花朵大小',
       tones:['彩色','單色','黑白'],
-      bgs:['淺藍天晴天','淺綠','淺灰加點點','水彩紙','水泥牆','下雨天','陰天']}
+      bgs:['淺藍天晴天','淺綠','淺灰加點點','水彩紙','水泥牆','下雨天','陰天','黑色','白色']}
 };
 let lang='en';
 const t=k=>STR[lang][k];
@@ -176,14 +176,23 @@ const SPECIES=[
 ];
 const STEM_GREENS=['#2d6a4f','#3f8f5f','#6ba368'];
 const GROW_SPEEDS=[0.006,0.012,0.022];
-let curSpecies='any', curBg=0, toneMode='color';
+let curSpecies='any', curBg=2, toneMode='color';
+const MONO_COLORS=['#c73e2e','#3e5fa8','#3e8e5a','#7b5fc4','#b07a3e','#c44a6e','#2b2b2b'];
+let monoIdx=0;
 function buildTones(){
   const el=document.getElementById('tones');
   const modes=['color','mono','bw'];
-  el.innerHTML=t('tones').map((n,i)=>
-    `<button class="chip${toneMode===modes[i]?' on':''}" data-m="${modes[i]}">${n}</button>`
-  ).join('');
-  el.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{toneMode=b.dataset.m;buildTones();});
+  el.innerHTML=t('tones').map((n,i)=>{
+    const dot=i===1?`<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${MONO_COLORS[monoIdx]};margin-right:6px;vertical-align:baseline"></span>`:'';
+    return `<button class="chip${toneMode===modes[i]?' on':''}" data-m="${modes[i]}">${dot}${n}</button>`;
+  }).join('');
+  el.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{
+    const m=b.dataset.m;
+    if(m==='mono'&&toneMode==='mono') monoIdx=(monoIdx+1)%MONO_COLORS.length; // each click cycles color
+    else toneMode=m;
+    if(m==='mono') toneMode='mono';
+    buildTones();
+  });
 }
 /* ---- tone: map any color to current tone mode ---- */
 function parseCol(c){
@@ -198,8 +207,8 @@ function TC(c,f){
     const v=Math.round(45+lum*0.72);
     return `rgb(${v},${v},${v})`;
   }
-  if(!f||!f.monoBase) return c; // mono needs flower context
-  const [br,bg,bb]=parseCol(f.monoBase);
+  // mono: pull every color toward the selected mono hue
+  const [br,bg,bb]=parseCol(MONO_COLORS[monoIdx]);
   return `rgb(${Math.round(r*0.22+br*0.78)},${Math.round(g*0.22+bg*0.78)},${Math.round(b*0.22+bb*0.78)})`;
 }
 /* sliders */
@@ -599,12 +608,16 @@ function drawBackground(g,time){
     }
   }else if(curBg===1){ // light green
     g.fillStyle=dark?'#14231a':'#e2f0da';g.fillRect(0,0,W,H);
-  }else if(curBg===2){ // gray dots
-    g.fillStyle=dark?'#1e1e1e':'#e8e8e8';g.fillRect(0,0,W,H);
-    g.fillStyle=dark?'rgba(255,255,255,.10)':'rgba(0,0,0,.10)';
+  }else if(curBg===2){ // gray dots (light)
+    g.fillStyle=dark?'#1e1e1e':'#f1f1f1';g.fillRect(0,0,W,H);
+    g.fillStyle=dark?'rgba(255,255,255,.10)':'rgba(0,0,0,.08)';
     for(let y=14;y<H;y+=28)for(let x=14;x<W;x+=28){
       g.beginPath();g.arc(x,y,1.6,0,6.2832);g.fill();
     }
+  }else if(curBg===7){ // black
+    g.fillStyle='#101010';g.fillRect(0,0,W,H);
+  }else if(curBg===8){ // white
+    g.fillStyle='#fdfdfd';g.fillRect(0,0,W,H);
   }else if(curBg===4){ // concrete
     g.fillStyle=dark?'#232323':'#cfcfcb';g.fillRect(0,0,W,H);
     const rng=mulberry(42);
